@@ -5,19 +5,19 @@ export default function Header() {
   const { viewMode, setViewMode } = useNavigationStore();
 
   return (
-    <header className="h-16 bg-white border-b border-ru-border">
-      <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center">
+    <header className="bg-white border-b border-ru-border">
+      {/* Top bar with centered logo */}
+      <div className="h-16 border-b border-ru-border/50">
+        <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center justify-center relative">
+          {/* Logo - centered */}
           <img
             src="/ru-logo-official.svg"
             alt="Radboud Universiteit"
             className="h-10"
           />
-        </div>
 
-        {/* Right side */}
-        <div className="flex items-center gap-4">
+          {/* Right side - absolute positioned */}
+          <div className="absolute right-6 flex items-center gap-4">
           {/* View mode toggle */}
           <div className="flex gap-0.5 bg-ru-light-gray rounded-lg p-0.5">
             <button
@@ -62,6 +62,7 @@ export default function Header() {
             <span className="text-ru-border">|</span>
             <span className="text-ru-border">EN</span>
           </button>
+          </div>
         </div>
       </div>
 
