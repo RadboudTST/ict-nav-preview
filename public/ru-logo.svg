@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 50" fill="none">
+  <!-- Radboud Universiteit text -->
+  <text x="0" y="32" font-family="Georgia, serif" font-size="24" font-weight="400" fill="#333333">
+    Radboud Universiteit
+  </text>
+  <!-- University seal/crest circle -->
+  <circle cx="255" cy="25" r="20" fill="none" stroke="#8B0000" stroke-width="1.5"/>
+  <!-- Inner cross pattern -->
+  <line x1="255" y1="8" x2="255" y2="42" stroke="#8B0000" stroke-width="1"/>
+  <line x1="238" y1="25" x2="272" y2="25" stroke="#8B0000" stroke-width="1"/>
+  <!-- Corner decorations -->
+  <circle cx="245" cy="15" r="3" fill="#8B0000"/>
+  <circle cx="265" cy="15" r="3" fill="#8B0000"/>
+  <circle cx="245" cy="35" r="3" fill="#8B0000"/>
+  <circle cx="265" cy="35" r="3" fill="#8B0000"/>
+</svg>

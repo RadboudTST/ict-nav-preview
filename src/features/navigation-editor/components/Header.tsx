@@ -8,10 +8,12 @@ export default function Header() {
     <header className="h-16 bg-white border-b border-ru-border">
       <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-4">
-          <div className="bg-ru-red-impact text-white px-6 py-2.5 font-bold text-lg tracking-tight">
-            Radboud Universiteit
-          </div>
+        <div className="flex items-center">
+          <img
+            src="/ru-logo-official.svg"
+            alt="Radboud Universiteit"
+            className="h-10"
+          />
         </div>
 
         {/* Right side */}
