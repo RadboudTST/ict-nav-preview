@@ -9,7 +9,7 @@ export default function PreviewSidebar() {
       <div className="py-6">
         {/* Sidebar navigation header */}
         <div className="px-5 mb-4">
-          <h2 className="text-lg font-bold text-ru-maroon">
+          <h2 className="text-lg font-bold text-ru-maroon border-b-2 border-ru-maroon pb-2">
             Campusfaciliteiten & gebouwen
           </h2>
         </div>
@@ -26,7 +26,7 @@ export default function PreviewSidebar() {
               <ChevronDown size={16} />
             </button>
 
-            {/* ICT sub-items */}
+            {/* ICT sub-items - no chevrons, like ru.nl */}
             <div className="bg-white border-t border-ru-border/50">
               {categories.map((category) => {
                 const isSelected = selectedPreviewId === category.id;
@@ -34,7 +34,7 @@ export default function PreviewSidebar() {
                   <button
                     key={category.id}
                     onClick={() => setPreviewSelection(category.id)}
-                    className={`w-full text-left px-5 py-2.5 text-sm transition-colors flex items-center justify-between group relative ${
+                    className={`w-full text-left px-8 py-2.5 text-sm transition-colors relative ${
                       isSelected
                         ? 'text-ru-red-impact font-medium'
                         : 'text-ru-maroon hover:text-ru-red-impact'
@@ -42,15 +42,9 @@ export default function PreviewSidebar() {
                   >
                     {/* Red underline indicator for selected item */}
                     {isSelected && (
-                      <span className="absolute left-5 bottom-0 w-[calc(100%-40px)] h-0.5 bg-ru-red-impact" />
+                      <span className="absolute left-8 bottom-0 right-5 h-0.5 bg-ru-red-impact" />
                     )}
-                    <span className="pl-3">{category.label}</span>
-                    <ChevronRight
-                      size={14}
-                      className={`transition-opacity ${
-                        isSelected ? 'opacity-100 text-ru-red-impact' : 'opacity-0 group-hover:opacity-50'
-                      }`}
-                    />
+                    {category.label}
                   </button>
                 );
               })}
