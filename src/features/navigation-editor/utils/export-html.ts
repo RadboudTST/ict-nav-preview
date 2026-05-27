@@ -740,8 +740,8 @@ export function generateStandaloneHtml(
             ${(cat.sections && cat.sections.length > 0) ? (
               cat.useAccordion ? `
             <div style="margin-top: 40px;">
-              ${cat.sections.map((section, idx) => `
-              <div class="accordion-item${idx === 0 ? ' expanded' : ''}">
+              ${cat.sections.map((section) => `
+              <div class="accordion-item">
                 <button class="accordion-header" onclick="toggleAccordion(this)">
                   <span class="accordion-title">${escapeHtml(section.title)}</span>
                   <span class="accordion-arrow">↓</span>
@@ -783,8 +783,8 @@ export function generateStandaloneHtml(
             ${(page.sections && page.sections.length > 0) ? (
               page.useAccordion ? `
             <div style="margin-top: 40px;">
-              ${page.sections.map((section, idx) => `
-              <div class="accordion-item${idx === 0 ? ' expanded' : ''}">
+              ${page.sections.map((section) => `
+              <div class="accordion-item">
                 <button class="accordion-header" onclick="toggleAccordion(this)">
                   <span class="accordion-title">${escapeHtml(section.title)}</span>
                   <span class="accordion-arrow">↓</span>
