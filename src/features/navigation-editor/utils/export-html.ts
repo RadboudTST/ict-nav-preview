@@ -125,7 +125,7 @@ export function generateStandaloneHtml(
       align-items: center;
       gap: 6px;
       padding: 0 16px 0 0;
-      color: var(--ru-berry);
+      color: var(--ru-red-impact);
       font-size: 16px;
       white-space: nowrap;
       font-weight: 800;
