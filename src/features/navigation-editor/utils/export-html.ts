@@ -30,15 +30,6 @@ export function generateStandaloneHtml(
   // Use the actual categories array order for sidebar (respects user reordering)
   const sortedForSidebar = categories;
 
-  const structureLabel = structureType === 'current' ? 'RU.nl (origineel)' : 'Voorstel (bewerkt)';
-  const exportDate = new Date().toLocaleDateString('nl-NL', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
   return `<!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -381,18 +372,6 @@ export function generateStandaloneHtml(
     .footer-secondary-links a:hover { text-decoration: underline; }
     .footer-logo { height: 32px; opacity: 0.4; }
 
-    /* Export Info Banner */
-    .export-banner {
-      background: var(--ru-blue);
-      color: #fff;
-      padding: 12px 24px;
-      font-size: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .export-banner strong { font-weight: 600; }
-
     /* Separator */
     .separator-line {
       border: none;
@@ -588,14 +567,6 @@ export function generateStandaloneHtml(
 </head>
 <body>
   <div class="page-wrapper">
-    <!-- Export Info Banner -->
-    <div class="export-banner">
-      <div>
-        <strong>ICT Navigatie Preview</strong> - ${structureLabel}
-      </div>
-      <div>Geëxporteerd op ${exportDate}</div>
-    </div>
-
     <!-- Header Top -->
     <header class="header-top">
       <div class="container">

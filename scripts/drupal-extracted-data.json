@@ -1,0 +1,122 @@
+{
+  "_meta": {
+    "extractedAt": "2026-01-11",
+    "updatedAt": "2026-01-11",
+    "source": "Drupal CMS /node/{id}/edit pages",
+    "status": "verified",
+    "totalDirectPages": 42,
+    "totalCrossLinks": 10,
+    "extractionMethod": "Manual navigation to /node/{id}/edit pages (READ-ONLY), extracted Naam, Samenvatting, and URL alias fields",
+    "note": "Cross-links are pages displayed in ICT navigation but actually hosted in other sections (medewerkers, handleidingen, studenten). They are marked with crossLink: true."
+  },
+  "nodeIdsByCategory": {
+    "wachtwoord": {
+      "label": "Wachtwoord",
+      "pages": [
+        { "nodeId": 53060, "title": "Veilig wachtwoord instellen" },
+        { "nodeId": 1420, "title": "Wachtwoord geblokkeerd" },
+        { "nodeId": 1419, "title": "Wachtwoord vergeten" },
+        { "nodeId": 1413, "title": "Wachtwoord wijzigen" }
+      ]
+    },
+    "wifi": {
+      "label": "Wifi",
+      "pages": [
+        { "nodeId": 19341, "title": "Eduroam (wifi) werkt niet" },
+        { "nodeId": 1352, "title": "Wifi (eduroam) instellen" },
+        { "nodeId": 55638, "title": "Wifi voor gasten" }
+      ]
+    },
+    "buitenDeCampusWerken": {
+      "label": "Buiten de campus werken",
+      "pages": [
+        { "nodeId": 1649, "title": "Buiten de campus toegang tot bestanden" },
+        { "nodeId": 1652, "title": "Problemen met eduVPN" },
+        { "nodeId": 1570, "title": "VPN: buiten de campus toegang tot systemen" },
+        { "title": "Thuiswerken", "crossLink": true, "url": "/medewerkers/welzijn-ontwikkeling/thuiswerken" },
+        { "title": "Citrix Workspace", "crossLink": true, "url": "/handleidingen/citrix-workspace" }
+      ]
+    },
+    "bestandenDelen": {
+      "label": "Bestanden delen en samenwerken",
+      "pages": [
+        { "nodeId": 1854, "title": "Bestanden opslaan en delen" },
+        { "nodeId": 54217, "title": "Bestanden versleuteld versturen met Filesender" },
+        { "nodeId": 55047, "title": "Werkgroepmap aanvragen" },
+        { "nodeId": 1355, "title": "OneDrive/Sharepoint problemen" },
+        { "nodeId": 55044, "title": "Samenwerken via Teams" },
+        { "nodeId": 70957, "title": "Sharepoint" },
+        { "title": "Cloudopslag OneDrive", "crossLink": true, "url": "/medewerkers/ict/cloudopslag-onedrive" }
+      ]
+    },
+    "printen": {
+      "label": "Printen, kopiëren en scannen",
+      "pages": [
+        { "nodeId": 53789, "title": "Printen" },
+        { "nodeId": 1351, "title": "Printtegoed opladen" },
+        { "nodeId": 66586, "title": "Poster printen" },
+        { "title": "Printer installeren", "crossLink": true, "url": "/handleidingen/printer-installeren" },
+        { "title": "Dubbelzijdig printen", "crossLink": true, "url": "/handleidingen/dubbelzijdig-printen" }
+      ]
+    },
+    "emailEnAgenda": {
+      "label": "E-mail en agenda",
+      "pages": [
+        { "nodeId": 51375, "title": "Mail gebruiken" },
+        { "nodeId": 1350, "title": "E-mail en agenda op je eigen apparaat zetten" },
+        { "nodeId": 1650, "title": "Vreemde e-mail of 'phishing'" },
+        { "title": "Afwezigheidsassistent", "crossLink": true, "url": "/handleidingen/afwezigheidsassistent" },
+        { "title": "Gedeelde mailbox", "crossLink": true, "url": "/handleidingen/gedeelde-mailbox" },
+        { "title": "Mailinglijsten", "crossLink": true, "url": "/handleidingen/mailinglijsten" },
+        { "title": "E-mail doorsturen", "crossLink": true, "url": "/handleidingen/email-doorsturen" },
+        { "title": "Functionele mailbox", "crossLink": true, "url": "/handleidingen/functionele-mailbox" }
+      ]
+    },
+    "beveiliging": {
+      "label": "Beveiliging",
+      "pages": [
+        { "nodeId": 1855, "title": "Bestanden versleutelen" },
+        { "nodeId": 1665, "title": "Veilig digitaal werken" },
+        { "nodeId": 1354, "title": "Beveiligingsincident melden" },
+        { "nodeId": 54474, "title": "MFA bij Microsoft 365-applicaties" },
+        { "nodeId": 54472, "title": "Multi Factor Authenticatie (MFA)" },
+        { "nodeId": 47669, "title": "SURFsecureID" },
+        { "nodeId": 73076, "title": "Vertrouwelijke e-mails versturen" }
+      ]
+    },
+    "software": {
+      "label": "Software",
+      "pages": [
+        { "nodeId": 53303, "title": "Software voor medewerkers" },
+        { "nodeId": 71338, "title": "Archiefweb" },
+        { "nodeId": 55197, "title": "Microsoft 365" },
+        { "nodeId": 1324, "title": "Software voor studenten" },
+        { "nodeId": 76637, "title": "SURFdrive" },
+        { "nodeId": 46905, "title": "Research Drive" },
+        { "nodeId": 56113, "title": "Teams" },
+        { "nodeId": 46225, "title": "Webex" }
+      ]
+    },
+    "hardware": {
+      "label": "Hardware",
+      "pages": [
+        { "nodeId": 53221, "title": "Laptops en apparaten aanschaffen" },
+        { "nodeId": 53759, "title": "Standaard laptop voor medewerkers" },
+        { "nodeId": 53302, "title": "Randapparatuur en accessoires" },
+        { "nodeId": 66585, "title": "Radboud Recycle: lever je oude gegevensdragers in" },
+        { "nodeId": 55535, "title": "USB-sticks en externe harde schijven" }
+      ]
+    }
+  },
+  "directNodeIds": [
+    53060, 1420, 1419, 1413,
+    19341, 1352, 55638,
+    1649, 1652, 1570,
+    1854, 54217, 55047, 1355, 55044, 70957,
+    53789, 1351, 66586,
+    51375, 1350, 1650,
+    1855, 1665, 1354, 54474, 54472, 47669, 73076,
+    53303, 71338, 55197, 1324, 76637, 46905, 56113, 46225,
+    53221, 53759, 53302, 66585, 55535
+  ]
+}
