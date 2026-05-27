@@ -35,7 +35,31 @@ export function generateStandaloneHtml(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ICT Navigatie Preview - Radboud Universiteit</title>
+  <title>ICT | Radboud Universiteit</title>
+  <meta name="description" content="Alles over ICT: wifi, VPN, wachtwoorden, printen, software en meer.">
+  <meta name="keywords" content="ICT, laptop, computer, wifi, verbinding maken, eduroam, netwerk, hardware, software, wachtwoord, Radboudaccount, e-mail, printen, kopieren, scannen">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Radboud Universiteit">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="MobileOptimized" content="width">
+  <meta name="HandheldFriendly" content="true">
+  <meta name="msapplication-TileColor" content="#b52718">
+  <!-- Open Graph / Social sharing -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://radboudtst.github.io/ict-nav-preview/">
+  <meta property="og:title" content="ICT | Radboud Universiteit">
+  <meta property="og:description" content="Alles over ICT: wifi, VPN, wachtwoorden, printen, software en meer.">
+  <meta property="og:image" content="https://www.ru.nl/radboud-universiteit-open-graph-logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="600">
+  <!-- Favicons (from ru.nl) -->
+  <link rel="icon" href="https://www.ru.nl/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="https://www.ru.nl/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://www.ru.nl/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://www.ru.nl/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://www.ru.nl/favicon-16x16.png">
+  <!-- Font Awesome (for social icons — same CDN as ru.nl) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     /* Reset & Base */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,7 +67,7 @@ export function generateStandaloneHtml(
       font-family: 'Open Sans', Arial, sans-serif;
       color: #333333;
       line-height: 1.5;
-      background: #fff;
+      background: #f5f5f5;
     }
     a { text-decoration: none; color: inherit; }
     button { font-family: inherit; cursor: pointer; border: none; background: none; }
@@ -63,7 +87,7 @@ export function generateStandaloneHtml(
     }
 
     /* Layout */
-    .page-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
+    .page-wrapper { display: flex; flex-direction: column; min-height: 100vh; background: #fff; max-width: 1400px; margin: 0 auto; }
     .content-wrapper { flex: 1; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
     .flex { display: flex; }
@@ -345,17 +369,19 @@ export function generateStandaloneHtml(
     .footer-address a { font-size: 14px; color: var(--ru-red-impact); }
     .social-icons { display: flex; gap: 8px; margin-top: 16px; }
     .social-icons a {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      background: var(--ru-gray);
+      border: 2px solid var(--ru-red-impact);
+      background: transparent;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 12px;
+      color: var(--ru-red-impact);
+      font-size: 15px;
+      text-decoration: none;
     }
-    .social-icons a:hover { background: var(--ru-maroon); }
+    .social-icons a:hover { background: var(--ru-red-impact); color: #fff; }
 
     /* Footer Secondary */
     .footer-secondary {
@@ -367,10 +393,24 @@ export function generateStandaloneHtml(
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
     }
     .footer-secondary-links { font-size: 13px; color: var(--ru-gray); }
     .footer-secondary-links a:hover { text-decoration: underline; }
-    .footer-logo { height: 32px; opacity: 0.4; }
+    .footer-logo-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .footer-logo { height: 28px; opacity: 1; }
+    .footer-logo-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ru-text);
+    }
 
     /* Separator */
     .separator-line {
@@ -590,7 +630,7 @@ export function generateStandaloneHtml(
         <div class="main-nav">
           <a href="#">Opleidingen ▾</a>
           <a href="#">Onderzoek ▾</a>
-          <a href="#">Services ▾</a>
+          <a href="#">Diensten ▾</a>
           <a href="#">Werken bij ▾</a>
           <a href="#">Over ons ▾</a>
         </div>
@@ -601,7 +641,7 @@ export function generateStandaloneHtml(
           </div>
           <div class="search-box">
             <input type="text" placeholder="Zoek">
-            <button>🔍</button>
+            <button aria-label="Zoeken"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
           </div>
         </div>
       </div>
@@ -613,9 +653,9 @@ export function generateStandaloneHtml(
         <nav class="breadcrumb" id="breadcrumb">
           <a href="#" onclick="showRoot(); return false;">Home</a>
           <span class="chevron">›</span>
-          <a href="#">Services</a>
+          <a href="#">Diensten</a>
           <span class="chevron">›</span>
-          <a href="#">Campusfaciliteiten & gebouwen</a>
+          <a href="#">Campusfaciliteiten &amp; gebouwen</a>
           <span class="chevron">›</span>
           <span class="current" id="breadcrumb-current">ICT</span>
         </nav>
@@ -813,12 +853,12 @@ export function generateStandaloneHtml(
             <p>Houtlaan 4<br>6525 XZ Nijmegen</p>
             <a href="#">Neem contact op</a>
             <div class="social-icons">
-              <a href="#" title="Facebook">f</a>
-              <a href="#" title="Instagram">ig</a>
-              <a href="#" title="LinkedIn">in</a>
-              <a href="#" title="YouTube">yt</a>
-              <a href="#" title="TikTok">tk</a>
-              <a href="#" title="Snapchat">sc</a>
+              <a href="https://www.facebook.com/radbouduniversiteit" title="Facebook" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook-f"></i></a>
+              <a href="https://www.instagram.com/radbouduniversity" title="Instagram" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+              <a href="https://www.linkedin.com/school/radboud-university-nijmegen/" title="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-linkedin-in"></i></a>
+              <a href="https://www.youtube.com/user/RadboudUniversity" title="YouTube" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
+              <a href="https://www.tiktok.com/@radbouduni" title="TikTok" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-tiktok"></i></a>
+              <a href="https://www.snapchat.com/add/radbouduni" title="Snapchat" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-snapchat"></i></a>
             </div>
           </div>
         </div>
@@ -829,12 +869,14 @@ export function generateStandaloneHtml(
     <div class="footer-secondary">
       <div class="container">
         <div class="footer-secondary-links">
-          <a href="#">©2025 - Disclaimer</a> | <a href="#">Privacy & cookies</a>
+          <a href="#">©2026 - Disclaimer</a> &nbsp;|&nbsp; <a href="#">Privacy &amp; cookies</a>
         </div>
-        <svg class="footer-logo" viewBox="0 0 198 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#222" d="m179.03 38.65.562.054 1.635 2.096-.173-1.741-.15-.102.013-.147.632-.004-.01.11-.09.155.221 2.732-.402.002-1.717-2.18-.11 1.707.141.153-.014.231-.818-.01v-.166l.208-.095.198-2.478-.108-.146-.018-.17Zm-1.526-.258.964.175-.016.212-.236.011-.494 2.477.231.173-.011.12-1.05-.232.068-.131.255-.073.49-2.39-.242-.177.041-.165Zm6.838-.09.167.651-.132.084c-.218-.265-.553-.345-.883-.276-.485.127-.789.704-.618 1.177l1.456-.331.12-.263.143-.038.161.68-.151.033-.15-.094-1.434.341c.026.546.581.958 1.142.844.363-.06.774-.457.74-.919l.108.006.214.654c-.28.363-.544.538-1 .636-.882.19-1.68-.01-1.944-1.117-.38-1.207.39-1.686 1.297-1.95.28-.077.468-.081.764-.119ZM174.32 37.05l.507.216-.08 1.853 1.045-1.217-.053-.094.089-.067.734.296-.01.19-.13.062-.33 2.518.181.206-.049.15-.861-.382.05-.182.156-.038.237-1.986-1.529 1.825-.308-.1.21-2.29-1.24 1.486.11.208-.047.112-.678-.403.077-.167.237.018 1.633-1.862-.08-.199.13-.153Zm14.365-.897s-.15.228-.203.387c-.033.092-.043.253-.043.253s-.231.047-.351.08c-.308.093-.757.393-.898.49l-.044.03.408.856s.587-.2.819-.422c.104-.098.243-.283.243-.283l.294.597s-.243-.002-.396.032c-.306.068-.79.412-.79.412l.58 1.175.212.032.082.098-.81.44-.102-.138.055-.198-1.147-2.275-.237.002-.05-.177Zm-2.394 3.075c.069.18 0 .39-.184.479-.177.08-.385-.006-.48-.183a.357.357 0 0 1 .193-.47.353.353 0 0 1 .471.174Zm-14.647-3.658c.428-.045.79.039 1.095.304l.04.03.015.013.018.012.02.021.038.046c.277.286.364.65.342 1.075l-.02.167c-.066.386-.27.747-.58 1.007-.597.498-1.4.522-2.016.008l-.018-.012c-.577-.573-.583-1.366-.094-1.98a1.61 1.61 0 0 1 1.16-.691Zm18.662-.75.463.49-.067.137c-.332-.122-.66-.032-.91.194-.385.334-.372.973.015 1.295l1.14-.975-.031-.283.098-.104.475.471-.108.1h-.18l-1.147 1.064c.287.485.995.593 1.425.179.279-.238.416-.8.246-1.237l.1-.047.443.522c-.05.465-.204.742-.551 1.056-.681.642-1.492.83-2.297-.022-.851-.91-.41-1.715.277-2.364.198-.197.365-.297.609-.475Zm-17.842 1.311c-.502-.455-1.138.216-1.315.394-.21.222-.49.66-.487.988a.45.45 0 0 0 .199.376l.037.048c.14.131.289.184.455.182.393-.01.772-.367.872-.469.141-.151.799-.975.314-1.45Zm9.56-36.13v1.58h1.604V3.93a6.988 6.988 0 0 1 2.695 1.97c.95.29 1.307 1.04 1.307 1.75v2.574h2.797l.133.378c.346 1.027.477 2.15.477 3.374 0 3.786-1.395 8.216-2.777 11.672-2.082 5.218-4.852 9.946-6.318 11.52-.333.342-.612.64-1.08.66-.009.004-.017 0-.03 0-.008 0-.022.004-.032 0-.451-.02-.726-.318-1.068-.66-1.43-1.574-4.178-6.302-6.256-11.52-1.37-3.456-2.772-7.886-2.772-11.672 0-1.224.15-2.347.487-3.374l.12-.378h2.787V7.65c0-.71.36-1.46 1.297-1.751.663-.834 1.62-1.529 2.68-1.97V1.58h1.571V0h2.379ZM181.17.864h-.661V2.44h-1.574v.699h1.574v1.603h.66V3.14h1.606v-.7h-1.605V.865Z"/>
-          <path fill="#BE311A" d="M25.511 16.673c.135 0 .216.094.216.282l-.11 4.764v3.262c.004 1.62.028 2.07.122 2.257.141.298.249.363.908.422.138 0 .216.062.216.174v.299c0 .153-.045.202-.322.249l-1.98.386c-.122.016-.216.032-.275.032-.123 0-.17-.079-.186-.279l-.045-.671c-.03-.377-.03-.393-.138-.393a.317.317 0 0 0-.137.093 9.138 9.138 0 0 1-.789.657c-.46.314-.86.438-1.364.438-1.692 0-2.897-1.562-2.897-3.745 0-2.541 1.439-4.274 3.527-4.274.412 0 1.207.172 1.4.298.047.047.092.063.107.063.061 0 .126-.124.126-.254l-.018-.282-.015-1.672c0-.819-.046-.88-.695-.99-.295-.03-.353-.078-.353-.296v-.275c0-.155.058-.204.304-.231l2.216-.297c.076-.017.149-.017.182-.017Zm36.149 0c.137 0 .215.094.215.282l-.111 4.764v2.79c0 2.008.017 2.524.123 2.729.138.298.244.363.909.422.135 0 .21.062.21.174v.299c0 .153-.045.202-.32.249l-1.98.386c-.124.016-.214.032-.277.032-.122 0-.167-.079-.183-.279l-.047-.671c-.031-.377-.031-.393-.137-.393-.018 0-.079.032-.14.093a9.15 9.15 0 0 1-.82.657c-.463.314-.861.438-1.368.438-1.686 0-2.875-1.562-2.875-3.745 0-2.541 1.419-4.274 3.505-4.274.414 0 1.235.172 1.433.298a.204.204 0 0 0 .11.063c.059 0 .122-.124.122-.254v-.01l-.014-.272L60 18.779c0-.819-.047-.88-.732-.99-.292-.03-.353-.078-.353-.296v-.275c0-.155.06-.204.306-.231l2.25-.297c.08-.017.156-.017.188-.017Zm-47.574 3.951c1.937 0 2.844.707 2.844 2.218l-.045 2.857v.376c.001 1.197.016 1.227.182 1.383.14.108.29.155.662.186.306.032.398.079.398.267v.252c0 .172-.047.206-.322.266l-1.825.309a2.108 2.108 0 0 1-.34.031c-.143 0-.23-.065-.259-.232-.045-.108-.088-.502-.07-.626 0-.28-.032-.41-.104-.41-.016 0-.061.035-.106.065a9.368 9.368 0 0 1-.94.673 3.028 3.028 0 0 1-1.514.406c-.969 0-1.736-.855-1.736-1.972 0-.532.172-1.207.386-1.51.12-.168.14-.186.95-.343l2.024-.406c.875-.19.979-.265.979-.736v-.269c0-1.068-.397-1.47-1.425-1.47-.66 0-1.53.251-2.116.595-.121.08-.184.096-.23.096-.074 0-.107-.067-.107-.188v-.1l.108-.81c.045-.421.153-.545.632-.67a9.953 9.953 0 0 1 1.974-.238ZM5.37 17.414c1.07 0 1.792.234 2.289.786.476.48.765 1.205.765 1.905 0 1.21-.736 2.318-1.739 2.599-.337.094-.365.11-.365.19 0 .014.018.047.057.09.11.189.204.352.247.487.324.738 1.34 2.548 1.877 3.282.431.596.63.765 1.09.877.26.068.3.088.306.28v.344c0 .143-.091.226-.244.226h-.124c-.334-.018-.89-.034-1.256-.034-.232 0-.552.016-.905.034H7.13c-.293 0-.293 0-.66-.962-.133-.343-1.181-2.557-1.73-3.717-.264-.563-.325-.61-.694-.61H3.94c-.059.015-.108.015-.108.015l-.245-.016c-.092 0-.17.11-.17.281v.756c0 .812.017 2.18.033 2.698.017.375.137.5.643.624.338.08.403.126.403.365v.313c0 .184-.047.253-.204.253-.106 0-.352-.018-.61-.034a20.833 20.833 0 0 0-2.46 0c-.263.016-.522.034-.614.034-.167 0-.216-.069-.216-.253v-.313c0-.239.06-.284.414-.365.508-.123.632-.249.646-.624.015-.612.031-1.729.031-2.698v-2.534c0-.973-.016-2.102-.031-2.726-.014-.393-.138-.504-.646-.628-.353-.077-.414-.126-.414-.361v-.316c0-.187.049-.248.184-.248.154 0 .383.016.646.032.279.016.63.03 1.12.03h.244c.546-.001.694-.006 1.951-.046.312-.016.585-.016.832-.016ZM3.832 18.463c-.337 0-.398.033-.398.25v.33l-.018 1.867v.575l.018.426c-.018.312.047.369.322.369.997 0 1.58-.118 1.933-.4.434-.36.687-.943.687-1.551 0-.881-.47-1.552-1.225-1.755-.302-.078-.736-.111-1.319-.111Z"/>
-        </svg>
+        <div class="footer-logo-block">
+          <svg class="footer-logo" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#BE311A" d="M21 3.93a6.988 6.988 0 0 1 2.695 1.97c.95.29 1.307 1.04 1.307 1.75v2.574h2.797l.133.378c.346 1.027.477 2.15.477 3.374 0 3.786-1.395 8.216-2.777 11.672-2.082 5.218-4.852 9.946-6.318 11.52-.333.342-.612.64-1.08.66-.009.004-.017 0-.03 0-.008 0-.022.004-.032 0-.451-.02-.726-.318-1.068-.66-1.43-1.574-4.178-6.302-6.256-11.52C9.478 21.786 8.076 17.356 8.076 13.57c0-1.224.15-2.347.487-3.374l.12-.378h2.787V7.65c0-.71.36-1.46 1.297-1.751.663-.834 1.62-1.529 2.68-1.97V1.58h1.571V0h2.379v1.58h1.604V3.93Z"/>
+          </svg>
+          <span class="footer-logo-text">Radboud Universiteit</span>
+        </div>
       </div>
     </div>
   </div>
