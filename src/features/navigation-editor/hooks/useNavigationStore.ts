@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { temporal, TemporalState } from 'zundo';
 import { produce } from 'immer';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
@@ -8,7 +8,81 @@ import { baseStructure, deepClone, cloneWithNewIds } from '../data/base-structur
 import { generateId, arrayMove } from '../utils/tree-helpers';
 import { downloadJson, downloadExcel } from '../utils/export-helpers';
 
-const STORAGE_KEY = 'ru-nav-editor-state-v9'; // Bumped for SURFdrive content update
+const STORAGE_KEY = 'ru-nav-editor-state-v20'; // v20: Added useAccordion flag for collapsible section support
+
+/**
+ * Safe localStorage wrapper that handles quota exceeded errors.
+ * Falls back gracefully when storage is full instead of silently corrupting state.
+ */
+const safeStorage = {
+  getItem: (name: string): string | null => {
+    try {
+      return localStorage.getItem(name);
+    } catch (error) {
+      console.error('[NavigationStore] Failed to read from localStorage:', error);
+      return null;
+    }
+  },
+  setItem: (name: string, value: string): void => {
+    try {
+      localStorage.setItem(name, value);
+    } catch (error) {
+      console.error('[NavigationStore] Failed to write to localStorage:', error);
+      // Notify the user that their changes may not be saved
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        // Dispatch a custom event so the UI can show a warning
+        window.dispatchEvent(new CustomEvent('storage-quota-exceeded', {
+          detail: { key: name, size: value.length }
+        }));
+      }
+    }
+  },
+  removeItem: (name: string): void => {
+    try {
+      localStorage.removeItem(name);
+    } catch (error) {
+      console.error('[NavigationStore] Failed to remove from localStorage:', error);
+    }
+  },
+};
+
+/**
+ * Validate that persisted data matches expected schema.
+ * Returns true if valid, false if data should be reset.
+ */
+function isValidPersistedState(data: unknown): data is { structures: { current: Category[]; proposed: Category[] }; activeStructure: 'current' | 'proposed' } {
+  if (!data || typeof data !== 'object') return false;
+
+  const state = data as Record<string, unknown>;
+
+  // Check structures exist
+  if (!state.structures || typeof state.structures !== 'object') return false;
+
+  const structures = state.structures as Record<string, unknown>;
+
+  // Check both structure arrays exist
+  if (!Array.isArray(structures.current) || !Array.isArray(structures.proposed)) return false;
+
+  // Validate each category has required fields
+  const validateCategory = (cat: unknown): boolean => {
+    if (!cat || typeof cat !== 'object') return false;
+    const c = cat as Record<string, unknown>;
+    return typeof c.id === 'string' && typeof c.label === 'string';
+  };
+
+  // Validate at least basic structure of categories
+  for (const cat of structures.current) {
+    if (!validateCategory(cat)) return false;
+  }
+  for (const cat of structures.proposed) {
+    if (!validateCategory(cat)) return false;
+  }
+
+  // Check activeStructure is valid
+  if (state.activeStructure !== 'current' && state.activeStructure !== 'proposed') return false;
+
+  return true;
+}
 
 // Multi-structure state type
 interface MultiStructureState {
@@ -36,7 +110,8 @@ interface MultiStructureActions extends Omit<NavigationActions, 'reset' | 'impor
   reset: () => void;
   resetCurrentStructure: () => void;
   resetToBaseStructure: () => void;
-  syncStructures: (direction: 'current-to-proposed' | 'proposed-to-current') => void;
+  // Only current-to-proposed is supported since 'current' is read-only
+  syncStructures: (direction: 'current-to-proposed') => void;
   importStructure: (data: Category[]) => void;
 }
 
@@ -102,6 +177,9 @@ export const useNavigationStore = create<NavigationStore>()(
             isReadOnly: key === 'current', // "current" is always read-only
             selectedId: null,
             selectedPreviewId: null,
+            // Clear page selection to prevent stale references to pages in the other structure
+            selectedPageId: null,
+            selectedPageParentId: null,
           })),
 
         // CRUD - all operations work on the active structure
@@ -146,6 +224,63 @@ export const useNavigationStore = create<NavigationStore>()(
             )
           ),
 
+        updateCategoryContent: (id: string, updates) =>
+          set((state) =>
+            syncCategories(
+              produce(state, (draft) => {
+                const cat = findCategory(draft.structures[draft.activeStructure], id);
+                if (cat) Object.assign(cat, updates);
+              })
+            )
+          ),
+
+        addCategorySection: (id: string, title: string) =>
+          set((state) =>
+            syncCategories(
+              produce(state, (draft) => {
+                const cat = findCategory(draft.structures[draft.activeStructure], id);
+                if (cat) {
+                  if (!cat.sections) cat.sections = [];
+                  cat.sections.push({ id: generateId(), title, content: '' });
+                }
+              })
+            )
+          ),
+
+        updateCategorySection: (id: string, sectionId: string, updates: Partial<ContentSection>) =>
+          set((state) =>
+            syncCategories(
+              produce(state, (draft) => {
+                const cat = findCategory(draft.structures[draft.activeStructure], id);
+                const section = cat?.sections?.find((s) => s.id === sectionId);
+                if (section) Object.assign(section, updates);
+              })
+            )
+          ),
+
+        deleteCategorySection: (id: string, sectionId: string) =>
+          set((state) =>
+            syncCategories(
+              produce(state, (draft) => {
+                const cat = findCategory(draft.structures[draft.activeStructure], id);
+                if (cat?.sections) {
+                  const idx = cat.sections.findIndex((s) => s.id === sectionId);
+                  if (idx !== -1) cat.sections.splice(idx, 1);
+                }
+              })
+            )
+          ),
+
+        reorderCategorySections: (id: string, fromIndex: number, toIndex: number) =>
+          set((state) =>
+            syncCategories(
+              produce(state, (draft) => {
+                const cat = findCategory(draft.structures[draft.activeStructure], id);
+                if (cat?.sections) cat.sections = arrayMove(cat.sections, fromIndex, toIndex);
+              })
+            )
+          ),
+
         deleteItem: (id: string) =>
           set((state) =>
             syncCategories(
@@ -153,6 +288,11 @@ export const useNavigationStore = create<NavigationStore>()(
                 const categories = draft.structures[draft.activeStructure];
                 const categoryIndex = categories.findIndex((c) => c.id === id);
                 if (categoryIndex !== -1) {
+                  // Clear page selection if the selected page was in this category
+                  if (draft.selectedPageParentId === id) {
+                    draft.selectedPageId = null;
+                    draft.selectedPageParentId = null;
+                  }
                   categories.splice(categoryIndex, 1);
                   if (draft.selectedId === id) {
                     draft.selectedId = null;
@@ -520,7 +660,7 @@ export const useNavigationStore = create<NavigationStore>()(
         },
 
         // Persistence
-        reset: () =>
+        reset: () => {
           set({
             structures: {
               current: deepClone(baseStructure),
@@ -537,9 +677,12 @@ export const useNavigationStore = create<NavigationStore>()(
             selectedPageParentId: null,
             highlightDifferences: true,
             highlightDuplicates: true,
-          }),
+          });
+          // Clear undo/redo history after reset to prevent undo-ing back to pre-reset state
+          useNavigationStore.temporal.getState().clear();
+        },
 
-        resetCurrentStructure: () =>
+        resetCurrentStructure: () => {
           set((state) => {
             const newStructures = { ...state.structures };
             if (state.activeStructure === 'current') {
@@ -555,10 +698,13 @@ export const useNavigationStore = create<NavigationStore>()(
               selectedPageId: null,
               selectedPageParentId: null,
             };
-          }),
+          });
+          // Clear undo/redo history after reset
+          useNavigationStore.temporal.getState().clear();
+        },
 
         // Reset both structures to the original ru.nl base
-        resetToBaseStructure: () =>
+        resetToBaseStructure: () => {
           set({
             structures: {
               current: deepClone(baseStructure),
@@ -575,36 +721,47 @@ export const useNavigationStore = create<NavigationStore>()(
             selectedPageParentId: null,
             highlightDifferences: true,
             highlightDuplicates: true,
-          }),
+          });
+          // Clear undo/redo history after reset
+          useNavigationStore.temporal.getState().clear();
+        },
 
-        // Sync current structure to proposed (reset proposed to original)
-        // Note: Only current-to-proposed is supported since 'current' is read-only
-        syncStructures: (direction: 'current-to-proposed' | 'proposed-to-current') =>
+        // Sync current structure to proposed (reset proposed to match current)
+        // Only current-to-proposed is supported since 'current' is read-only
+        syncStructures: (_direction: 'current-to-proposed') => {
           set((state) => {
-            // Only allow current-to-proposed since 'current' is read-only
-            if (direction !== 'current-to-proposed') {
-              return state;
-            }
             const newStructures = { ...state.structures };
-            // Copy current to proposed with new IDs
+            // Copy current to proposed with new IDs for independent editing
             newStructures.proposed = cloneWithNewIds(state.structures.current);
             return {
               structures: newStructures,
               categories: newStructures[state.activeStructure],
               selectedId: null,
               selectedPreviewId: null,
+              selectedPageId: null,
+              selectedPageParentId: null,
             };
-          }),
+          });
+          // Clear undo/redo history after sync
+          useNavigationStore.temporal.getState().clear();
+        },
 
         importStructure: (data: Category[]) =>
           set((state) => {
+            // Guard: prevent importing into read-only (current) structure
+            if (state.activeStructure === 'current') return state;
+            // Clone the imported data to prevent external mutations from affecting the store
+            const clonedData = deepClone(data);
             const newStructures = { ...state.structures };
-            newStructures[state.activeStructure] = data;
+            newStructures[state.activeStructure] = clonedData;
             return {
               structures: newStructures,
-              categories: data,
+              categories: clonedData,
               selectedId: null,
               selectedPreviewId: null,
+              // Clear page selection since imported structure has different IDs
+              selectedPageId: null,
+              selectedPageParentId: null,
             };
           }),
 
@@ -623,17 +780,25 @@ export const useNavigationStore = create<NavigationStore>()(
       }),
       {
         name: STORAGE_KEY,
+        storage: createJSONStorage(() => safeStorage),
         partialize: (state) => ({
           structures: state.structures,
           activeStructure: state.activeStructure,
         }),
         merge: (persistedState, currentState) => {
-          const persisted = persistedState as Partial<MultiStructureState>;
-          const structures = persisted.structures ?? currentState.structures;
-          const activeStructure = persisted.activeStructure ?? currentState.activeStructure;
+          // Validate persisted data - reset to defaults if invalid/corrupted
+          if (!isValidPersistedState(persistedState)) {
+            console.warn('[NavigationStore] Invalid persisted state detected, resetting to defaults');
+            return currentState;
+          }
+
+          const structures = persistedState.structures;
+          const activeStructure = persistedState.activeStructure;
+
           return {
             ...currentState,
-            ...persisted,
+            structures,
+            activeStructure,
             // Ensure categories is synced with activeStructure after hydration
             categories: structures[activeStructure],
             // Ensure isReadOnly is computed based on activeStructure
@@ -643,7 +808,7 @@ export const useNavigationStore = create<NavigationStore>()(
       }
     ),
     {
-      limit: 50,
+      limit: 200,
       partialize: (state) => ({
         structures: state.structures,
         activeStructure: state.activeStructure,
@@ -665,3 +830,24 @@ export const useTemporalStore = <T>(
 ): T => {
   return useStoreWithEqualityFn(useNavigationStore.temporal, selector, equality);
 };
+
+/**
+ * Utility to manually clear persisted storage.
+ * Useful for debugging or forcing a fresh start.
+ * After clearing, call reset() or reload the page.
+ */
+export function clearNavigationStorage(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    console.info('[NavigationStore] Storage cleared successfully');
+  } catch (error) {
+    console.error('[NavigationStore] Failed to clear storage:', error);
+  }
+}
+
+/**
+ * Get current storage key (useful for debugging)
+ */
+export function getStorageKey(): string {
+  return STORAGE_KEY;
+}

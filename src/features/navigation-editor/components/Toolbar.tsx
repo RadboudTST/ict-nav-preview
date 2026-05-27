@@ -1,8 +1,8 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import {
   FileJson,
   FileSpreadsheet,
-  FileText,
+  FileCode,
   Upload,
   RotateCcw,
   Undo2,
@@ -10,10 +10,19 @@ import {
   ChevronDown,
   Lock,
   Pencil,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  X,
 } from 'lucide-react';
 import { Button, toast, confirm } from '@/components/ui';
-import { useNavigationStore, useTemporalStore } from '../hooks';
-import { downloadJson, downloadExcel, downloadText, importStructure } from '../utils/export-helpers';
+import { useNavigationStore, useTemporalStore, clearNavigationStorage } from '../hooks';
+import { downloadJson, downloadExcel, importStructure } from '../utils/export-helpers';
+import { downloadHtml } from '../utils/export-html';
+
+// Check if running in development mode
+const isDev = import.meta.env.DEV;
 
 export default function Toolbar() {
   const {
@@ -28,8 +37,40 @@ export default function Toolbar() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    type: 'success' | 'error';
+    message: string;
+    warnings?: string[];
+  } | null>(null);
+  const importResultTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const importPopoverRef = useRef<HTMLDivElement>(null);
   const resetMenuRef = useRef<HTMLDivElement>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  const dismissImportResult = useCallback(() => {
+    setImportResult(null);
+    if (importResultTimerRef.current) {
+      clearTimeout(importResultTimerRef.current);
+      importResultTimerRef.current = null;
+    }
+  }, []);
+
+  const showImportResult = useCallback((result: NonNullable<typeof importResult>, duration = 8000) => {
+    dismissImportResult();
+    setImportResult(result);
+    importResultTimerRef.current = setTimeout(() => {
+      setImportResult(null);
+      importResultTimerRef.current = null;
+    }, duration);
+  }, [dismissImportResult]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (importResultTimerRef.current) clearTimeout(importResultTimerRef.current);
+    };
+  }, []);
 
   const { pastStates, futureStates, undo, redo } = useTemporalStore((state) => ({
     pastStates: state.pastStates,
@@ -76,13 +117,30 @@ export default function Toolbar() {
         e.preventDefault();
         setActiveStructure('proposed');
       }
+      // Ctrl/Cmd + Shift + R to reset storage (dev only)
+      if (isDev && (e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'R') {
+        e.preventDefault();
+        confirm({
+          title: 'Storage resetten?',
+          message: 'Dit verwijdert alle opgeslagen data en herlaadt de pagina. Dit kan niet ongedaan worden gemaakt.',
+          confirmLabel: 'Reset & herlaad',
+          cancelLabel: 'Annuleren',
+          variant: 'danger',
+        }).then((confirmed) => {
+          if (confirmed) {
+            clearNavigationStorage();
+            toast.success('Storage gereset, pagina wordt herladen...');
+            setTimeout(() => window.location.reload(), 500);
+          }
+        });
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [canUndo, canRedo, setActiveStructure]);
 
-  // Close menus when clicking outside
+  // Close menus/popovers when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (resetMenuRef.current && !resetMenuRef.current.contains(e.target as Node)) {
@@ -91,48 +149,85 @@ export default function Toolbar() {
       if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
         setExportMenuOpen(false);
       }
+      if (importResult && importPopoverRef.current && !importPopoverRef.current.contains(e.target as Node)) {
+        dismissImportResult();
+      }
     };
 
-    if (resetMenuOpen || exportMenuOpen) {
+    if (resetMenuOpen || exportMenuOpen || importResult) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [resetMenuOpen, exportMenuOpen]);
+  }, [resetMenuOpen, exportMenuOpen, importResult, dismissImportResult]);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const result = await importStructure(file);
+    setIsImporting(true);
+    dismissImportResult();
+    try {
+      const result = await importStructure(file);
 
-    if (result.success) {
-      storeImport(result.data);
-      toast.success('Navigatiestructuur succesvol geïmporteerd!');
-    } else {
-      toast.error(result.error);
-    }
+      if (result.success) {
+        storeImport(result.data);
+        const pageCount = result.data.reduce((sum, cat) => sum + (cat.pages?.length || 0), 0);
+        const crossLinkCount = result.data.reduce(
+          (sum, cat) => sum + (cat.pages?.filter((p) => p.crossLink).length || 0),
+          0
+        );
+        const crossLinkSuffix = crossLinkCount > 0 ? ` (${crossLinkCount} externe link${crossLinkCount > 1 ? 's' : ''})` : '';
+        const message = `${result.format} geïmporteerd: ${result.data.length} categorieën, ${pageCount} pagina's${crossLinkSuffix}`;
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+        // Collect warnings if any
+        let warnings: string[] | undefined;
+        if (result.warnings && result.warnings.length > 0) {
+          warnings = result.warnings.slice(0, 5);
+          if (result.warnings.length > 5) {
+            warnings.push(`...en ${result.warnings.length - 5} meer`);
+          }
+        }
+
+        showImportResult({ type: 'success', message, warnings });
+      } else {
+        showImportResult({ type: 'error', message: result.error });
+      }
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
   const handleExportJson = () => {
-    downloadJson(categories, activeStructure);
-    setExportMenuOpen(false);
-    toast.success('JSON bestand gedownload');
+    try {
+      downloadJson(categories, activeStructure);
+      setExportMenuOpen(false);
+      toast.success('JSON bestand gedownload');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Export mislukt');
+    }
   };
 
   const handleExportExcel = async () => {
     setExportMenuOpen(false);
-    await downloadExcel(categories, activeStructure);
-    toast.success('Excel bestand gedownload');
+    try {
+      await downloadExcel(categories, activeStructure);
+      toast.success('Excel bestand gedownload');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Export mislukt');
+    }
   };
 
-  const handleExportText = () => {
-    downloadText(categories, activeStructure);
-    setExportMenuOpen(false);
-    toast.success('Tekst bestand gedownload');
+  const handleExportHtml = () => {
+    try {
+      downloadHtml(categories, activeStructure);
+      setExportMenuOpen(false);
+      toast.success('HTML preview gedownload - open in browser om te bekijken');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Export mislukt');
+    }
   };
 
   const handleResetAll = async () => {
@@ -150,14 +245,14 @@ export default function Toolbar() {
 
   const handleSyncCurrentToProposed = async () => {
     const confirmed = await confirm({
-      title: '"Nieuw" terugzetten',
-      message: 'Weet je zeker dat je de nieuwe structuur wilt resetten naar de originele ru.nl versie? Je wijzigingen in "Nieuw" gaan verloren.',
+      title: 'Voorstel terugzetten',
+      message: 'Weet je zeker dat je je voorstel wilt resetten naar de originele RU.nl structuur? Al je wijzigingen gaan verloren.',
       confirmLabel: 'Terugzetten',
       variant: 'warning',
     });
     if (confirmed) {
       syncStructures('current-to-proposed');
-      toast.info('"Nieuw" teruggezet naar origineel ru.nl');
+      toast.info('Voorstel teruggezet naar origineel');
     }
   };
 
@@ -219,12 +314,13 @@ export default function Toolbar() {
                   <FileSpreadsheet size={16} />
                   <span>Excel (.xlsx)</span>
                 </button>
+                <div className="border-t border-ru-border my-1" />
                 <button
-                  onClick={handleExportText}
+                  onClick={handleExportHtml}
                   className="w-full px-4 py-2 text-left text-sm hover:bg-ru-light-gray flex items-center gap-2"
                 >
-                  <FileText size={16} />
-                  <span>Tekst (.txt)</span>
+                  <FileCode size={16} />
+                  <span>HTML (.html)</span>
                 </button>
               </div>
             </div>
@@ -242,10 +338,10 @@ export default function Toolbar() {
                 ? 'bg-ru-blue text-white'
                 : 'bg-white text-ru-text hover:bg-ru-light-gray'
             }`}
-            title="Huidige ru.nl structuur - alleen lezen (Ctrl+1)"
+            title="Originele ru.nl structuur (alleen lezen) — Ctrl+1"
           >
             <Lock size={14} />
-            Huidig (ru.nl)
+            RU.nl
           </button>
           <button
             onClick={() => setActiveStructure('proposed')}
@@ -254,10 +350,10 @@ export default function Toolbar() {
                 ? 'bg-ru-green text-white'
                 : 'bg-white text-ru-text hover:bg-ru-light-gray'
             }`}
-            title="Nieuwe voorgestelde structuur - bewerkbaar (Ctrl+2)"
+            title="Bewerk je voorstel — Ctrl+2"
           >
             <Pencil size={14} />
-            Nieuw (voorstel)
+            Bewerken
           </button>
         </div>
         <span className="ml-3 text-xs text-ru-text-light">
@@ -267,25 +363,84 @@ export default function Toolbar() {
 
       <div className="flex items-center gap-2">
         {/* Import - disabled in read-only mode */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json,.xlsx,.xls,.txt,.csv"
-          onChange={handleImport}
-          className="hidden"
-          id="import-file"
-          disabled={isReadOnly}
-        />
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-          title={isReadOnly ? 'Importeren niet beschikbaar - schakel naar "Nieuw" om te bewerken' : 'Importeer bestand (JSON, Excel, of Tekst)'}
-          disabled={isReadOnly}
-        >
-          <Upload size={18} className="mr-2" aria-hidden="true" />
-          Importeren
-        </Button>
+        <div className="relative">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,.xlsx,.xls,.txt,.csv"
+            onChange={handleImport}
+            className="hidden"
+            id="import-file"
+            disabled={isReadOnly || isImporting}
+          />
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            title={isReadOnly ? 'Importeren niet beschikbaar — schakel naar Bewerken' : 'Importeer bestand (JSON, Excel, of Tekst)'}
+            disabled={isReadOnly || isImporting}
+          >
+            {isImporting ? (
+              <Loader2 size={18} className="mr-2 animate-spin" aria-hidden="true" />
+            ) : (
+              <Upload size={18} className="mr-2" aria-hidden="true" />
+            )}
+            {isImporting ? 'Importeren...' : 'Importeren'}
+          </Button>
+
+          {/* Inline import result popover */}
+          {importResult && (
+            <div
+              ref={importPopoverRef}
+              className={`absolute right-0 top-full mt-2 z-20 w-80 rounded-lg border shadow-lg animate-slide-down-fade-in ${
+                importResult.type === 'success'
+                  ? 'bg-green-50 border-green-200'
+                  : 'bg-red-50 border-red-200'
+              }`}
+              role="status"
+              aria-live="polite"
+            >
+              <div className="flex items-start gap-2.5 p-3">
+                {importResult.type === 'success' ? (
+                  <CheckCircle2 size={18} className="text-green-600 mt-0.5 shrink-0" />
+                ) : (
+                  <XCircle size={18} className="text-red-600 mt-0.5 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${
+                    importResult.type === 'success' ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    {importResult.message}
+                  </p>
+                  {importResult.warnings && importResult.warnings.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-amber-200 bg-amber-50 -mx-3 -mb-3 px-3 pb-3 rounded-b-lg">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <AlertTriangle size={14} className="text-amber-600" />
+                        <span className="text-xs font-medium text-amber-700">
+                          Waarschuwingen
+                        </span>
+                      </div>
+                      <ul className="space-y-0.5">
+                        {importResult.warnings.map((w, i) => (
+                          <li key={i} className="text-xs text-amber-700">{w}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={dismissImportResult}
+                  className={`shrink-0 p-0.5 rounded hover:bg-black/10 ${
+                    importResult.type === 'success' ? 'text-green-600' : 'text-red-600'
+                  }`}
+                  aria-label="Sluiten"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="w-px h-8 bg-ru-border/50 mx-1" />
 
@@ -316,8 +471,8 @@ export default function Toolbar() {
                 >
                   <RotateCcw size={14} className="text-ru-gray" />
                   <div>
-                    <span className="font-medium">"Nieuw" terugzetten</span>
-                    <p className="text-xs text-ru-text-light mt-0.5">Herstel naar originele ru.nl structuur</p>
+                    <span className="font-medium">Voorstel terugzetten</span>
+                    <p className="text-xs text-ru-text-light mt-0.5">Herstel naar originele RU.nl structuur</p>
                   </div>
                 </button>
                 <div className="border-t border-ru-border my-1" />

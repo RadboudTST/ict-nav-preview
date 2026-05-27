@@ -1,0 +1,40 @@
+name: Deploy ICT Preview Site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'preview-site/**'
+  workflow_dispatch:   # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload preview-site as Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: preview-site/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

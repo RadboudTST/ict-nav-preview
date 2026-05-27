@@ -1,12 +1,16 @@
-import { MousePointer2, Keyboard, Move, FileJson, FileSpreadsheet, Plus } from 'lucide-react';
+import { MousePointer2, Keyboard, Move, FileJson, FileSpreadsheet, FileCode, Plus, ChevronDown } from 'lucide-react';
+import { toast } from '@/components/ui/Toast';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, rectSortingStrategy, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useNavigationStore } from '../hooks';
 import { findCategoryById } from '../utils/tree-helpers';
 import { PageItem, Category } from '../types/navigation.types';
 import PageCard from './PageCard';
 import InlinePageEditor from './InlinePageEditor';
 import TipTapInlineField from './TipTapInlineField';
+import TipTapEditor from './TipTapEditor';
+import InlineSectionEditor from './InlineSectionEditor';
+import { ErrorBoundary } from '@/components/ui';
 
 export default function MainContent() {
   const {
@@ -20,6 +24,11 @@ export default function MainContent() {
     clearSelectedPage,
     updateLabel,
     updateCategoryDescription,
+    updateCategoryContent,
+    addCategorySection,
+    updateCategorySection,
+    deleteCategorySection,
+    reorderCategorySections,
     isReadOnly,
   } = useNavigationStore();
 
@@ -53,6 +62,7 @@ export default function MainContent() {
   const handleAddPage = () => {
     if (!selectedId) return;
     addPage(selectedId, 'Nieuwe pagina', 'Beschrijving van de pagina...');
+    toast.success('Nieuwe pagina toegevoegd');
   };
 
   const handleDeletePage = (pageId: string) => {
@@ -61,6 +71,17 @@ export default function MainContent() {
   };
 
   const pages = selectedCategory?.pages || [];
+  const categorySections = selectedCategory?.sections || [];
+
+  const handleCategorySectionDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !selectedId) return;
+    const fromIndex = categorySections.findIndex((s) => s.id === active.id);
+    const toIndex = categorySections.findIndex((s) => s.id === over.id);
+    if (fromIndex !== -1 && toIndex !== -1) {
+      reorderCategorySections(selectedId, fromIndex, toIndex);
+    }
+  };
 
   // If a page is selected, show the inline page editor
   if (selectedPageData) {
@@ -116,8 +137,8 @@ export default function MainContent() {
                 <p className="text-sm text-ru-text">
                   {isReadOnly ? (
                     <>
-                      <strong>Let op:</strong> Dit is de originele ru.nl structuur (alleen lezen).
-                      Schakel naar "Nieuw (voorstel)" om wijzigingen te maken.
+                      <strong>Let op:</strong> Dit is de originele RU.nl structuur (alleen lezen).
+                      Schakel naar <strong>Bewerken</strong> om wijzigingen te maken.
                     </>
                   ) : (
                     <>
@@ -126,6 +147,84 @@ export default function MainContent() {
                   )}
                 </p>
               </div>
+            </div>
+
+            {/* Category Content Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-ru-border p-6">
+              {/* Main content editor */}
+              {(selectedCategory.content || !categorySections.length) && (
+                <div className="mb-8">
+                  <span className="text-xs font-medium text-ru-text-light uppercase tracking-wider block mb-2">
+                    Pagina inhoud
+                  </span>
+                  <ErrorBoundary name="Editor">
+                    <TipTapEditor
+                      content={selectedCategory.content || ''}
+                      onUpdate={(val) => updateCategoryContent(selectedCategory.id, { content: val })}
+                      placeholder="Begin met het schrijven van de categorie inhoud..."
+                      minHeight="200px"
+                      editable={!isReadOnly}
+                    />
+                  </ErrorBoundary>
+                </div>
+              )}
+
+              {/* Sections */}
+              {categorySections.length > 0 && (
+                <div className="mb-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-medium text-ru-text-light uppercase tracking-wider">
+                      Secties
+                    </span>
+                    {!isReadOnly && (
+                      <label className="flex items-center gap-2 text-sm text-ru-text cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={!!selectedCategory.useAccordion}
+                          onChange={() =>
+                            updateCategoryContent(selectedCategory.id, { useAccordion: !selectedCategory.useAccordion })
+                          }
+                          className="accent-ru-red-impact"
+                        />
+                        <ChevronDown size={14} className="text-ru-maroon" />
+                        Accordion weergave (inklapbaar in preview)
+                      </label>
+                    )}
+                  </div>
+                  <div className={`pl-4 border-l-2 ${selectedCategory.useAccordion ? 'border-ru-red-impact' : 'border-ru-light-gray'}`}>
+                    {isReadOnly ? (
+                      categorySections.map((section) => (
+                        <InlineSectionEditor key={section.id} section={section}
+                          onUpdate={(u) => updateCategorySection(selectedCategory.id, section.id, u)}
+                          onDelete={() => deleteCategorySection(selectedCategory.id, section.id)}
+                          isReadOnly />
+                      ))
+                    ) : (
+                      <DndContext collisionDetection={closestCenter} onDragEnd={handleCategorySectionDragEnd}>
+                        <SortableContext items={categorySections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                          {categorySections.map((section) => (
+                            <InlineSectionEditor key={section.id} section={section}
+                              onUpdate={(u) => updateCategorySection(selectedCategory.id, section.id, u)}
+                              onDelete={() => deleteCategorySection(selectedCategory.id, section.id)}
+                              isReadOnly={false} />
+                          ))}
+                        </SortableContext>
+                      </DndContext>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Add section button */}
+              {!isReadOnly && (
+                <button
+                  onClick={() => addCategorySection(selectedCategory.id, 'Nieuwe sectie')}
+                  className="flex items-center gap-2 w-full justify-center py-3 border-2 border-dashed border-ru-border rounded-lg text-ru-text-light hover:border-ru-red-impact hover:text-ru-red-impact transition-colors"
+                >
+                  <Plus size={20} />
+                  Sectie toevoegen
+                </button>
+              )}
             </div>
 
             {/* Pages Section */}
@@ -257,6 +356,16 @@ export default function MainContent() {
                   <p className="font-medium text-ru-text">Exporteren naar Excel</p>
                   <p className="text-sm text-ru-text-light">
                     Download de structuur als Excel-bestand met categorieën en pagina's.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <FileCode className="text-ru-blue mt-1 flex-shrink-0" size={20} />
+                <div>
+                  <p className="font-medium text-ru-text">Exporteren naar HTML</p>
+                  <p className="text-sm text-ru-text-light">
+                    Download als HTML-bestand om de structuur in een browser te bekijken.
                   </p>
                 </div>
               </div>

@@ -1,18 +1,5 @@
-import { Category } from '../types/navigation.types';
+import { Category, FeaturedCard } from '../types/navigation.types';
 import scrapedData from './scraped-content.json';
-
-// Main category labels to include (filter out single-page entries like ICT Helpdesk)
-const MAIN_CATEGORIES = [
-  'Bestanden delen en samenwerken',
-  'Beveiliging',
-  'Buiten de campus werken',
-  'E-mail en agenda',
-  'Hardware',
-  'Printen, kopiëren en scannen',
-  'Software',
-  'Wachtwoord',
-  'Wifi',
-];
 
 // Type for the scraped JSON structure
 interface ScrapedPage {
@@ -22,6 +9,7 @@ interface ScrapedPage {
   intro?: string;
   content?: string;
   url: string;
+  crossLink?: boolean; // True if this page links to another section
 }
 
 interface ScrapedCategory {
@@ -32,14 +20,24 @@ interface ScrapedCategory {
   pages: ScrapedPage[];
 }
 
+interface ScrapedFeaturedCard {
+  id: string;
+  title: string;
+  description: string;
+  url?: string;
+}
+
 interface ScrapedData {
   _meta: {
     source: string;
     scrapedAt: string;
     totalCategories: number;
     totalPages: number;
+    totalFeaturedCards?: number;
+    note?: string;
   };
   categories: ScrapedCategory[];
+  featuredCards?: ScrapedFeaturedCard[];
 }
 
 // Convert scraped data to our Category format
@@ -57,23 +55,25 @@ function convertToCategory(scraped: ScrapedCategory, index: number): Category {
       intro: page.intro,
       content: page.content,
       url: page.url,
+      ...(page.crossLink && { crossLink: true }),
     })),
   };
 }
 
-// Filter and convert scraped data to base structure
+// Convert scraped data to base structure
+// The JSON is already filtered and ordered correctly (fixed in scraped-content.json)
 const data = scrapedData as ScrapedData;
-const filteredCategories = data.categories
-  .filter((cat) => MAIN_CATEGORIES.includes(cat.label))
-  .sort((a, b) => {
-    // Sort by the order in MAIN_CATEGORIES
-    const indexA = MAIN_CATEGORIES.indexOf(a.label);
-    const indexB = MAIN_CATEGORIES.indexOf(b.label);
-    return indexA - indexB;
-  });
 
 // Export the base structure - this is the source of truth from ru.nl
-export const baseStructure: Category[] = filteredCategories.map(convertToCategory);
+export const baseStructure: Category[] = data.categories.map(convertToCategory);
+
+// Export featured cards (shown at bottom of ICT page, not in sidebar)
+export const featuredCards: FeaturedCard[] = (data.featuredCards || []).map((card) => ({
+  id: card.id,
+  title: card.title,
+  description: card.description,
+  url: card.url,
+}));
 
 // Utility to deep clone a structure with new IDs
 export function cloneWithNewIds(categories: Category[]): Category[] {
@@ -92,7 +92,7 @@ export function cloneWithNewIds(categories: Category[]): Category[] {
   });
 }
 
-// Utility to deep clone a structure (preserving IDs)
+// Utility to deep clone a structure using native structuredClone
 export function deepClone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj));
+  return structuredClone(obj);
 }

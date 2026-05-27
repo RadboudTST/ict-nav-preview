@@ -4,22 +4,30 @@ export interface ContentSection {
   content: string; // Markdown or plain text
 }
 
+// Featured cards shown at bottom of ICT page (not sidebar categories)
+export interface FeaturedCard {
+  id: string;
+  title: string;
+  description: string;
+  url?: string;
+}
+
 export interface PageItem {
   id: string;
   title: string;
   description: string; // Short description for cards
-  slug?: string;
-  url?: string; // Original source URL from ru.nl
+  url?: string; // Original source URL (for cross-links, this is the external destination URL)
   intro?: string; // Full intro paragraph
   content?: string; // Legacy: simple content field
   sections?: ContentSection[]; // Structured content sections
   lastModified?: string;
+  crossLink?: boolean; // True if this page links to another section (medewerkers, handleidingen, etc.)
+  useAccordion?: boolean; // When true, sections render as collapsible accordion in preview
 }
 
 export interface NavItem {
   id: string;
   label: string;
-  slug?: string;
   isExpanded?: boolean;
   pages?: PageItem[];
 }
@@ -29,6 +37,9 @@ export interface Category extends NavItem {
   url?: string; // Original source URL from ru.nl
   isExpanded: boolean;
   pages?: PageItem[];
+  content?: string;              // Rich text content for the category landing page
+  sections?: ContentSection[];   // Structured sections (same as PageItem.sections)
+  useAccordion?: boolean;        // When true, sections render as collapsible accordion in preview
 }
 
 export interface NavigationState {
@@ -44,14 +55,18 @@ export interface NavigationState {
   highlightDuplicates: boolean;
 }
 
-// Note: 'renamed' is reserved for future use when rename detection is implemented
-export type DifferenceType = 'new' | 'removed' | 'moved' | 'renamed' | 'unchanged';
+export type DifferenceType = 'new' | 'removed' | 'moved' | 'unchanged';
 
 export interface NavigationActions {
   // CRUD
   addCategory: (label: string) => void;
   updateLabel: (id: string, label: string) => void;
   updateCategoryDescription: (id: string, description: string) => void;
+  updateCategoryContent: (id: string, updates: Partial<Pick<Category, 'content' | 'sections' | 'useAccordion'>>) => void;
+  addCategorySection: (id: string, title: string) => void;
+  updateCategorySection: (id: string, sectionId: string, updates: Partial<ContentSection>) => void;
+  deleteCategorySection: (id: string, sectionId: string) => void;
+  reorderCategorySections: (id: string, fromIndex: number, toIndex: number) => void;
   deleteItem: (id: string) => void;
 
   // Page CRUD

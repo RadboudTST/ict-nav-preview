@@ -1,8 +1,9 @@
-import { ArrowLeft, Plus } from 'lucide-react';
+import { ArrowLeft, Plus, ChevronDown } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { PageItem, Category } from '../types/navigation.types';
 import { useNavigationStore } from '../hooks';
+import { ErrorBoundary } from '@/components/ui';
 import TipTapInlineField from './TipTapInlineField';
 import TipTapEditor from './TipTapEditor';
 import InlineSectionEditor from './InlineSectionEditor';
@@ -123,23 +124,41 @@ export default function InlinePageEditor({ page, parentCategory, onBack, isReadO
             <span className="text-xs font-medium text-ru-text-light uppercase tracking-wider block mb-2">
               Pagina inhoud
             </span>
-            <TipTapEditor
-              content={page.content || ''}
-              onUpdate={handleContentSave}
-              placeholder="Begin met het schrijven van de pagina inhoud..."
-              minHeight="200px"
-              editable={!isReadOnly}
-            />
+            <ErrorBoundary name="Editor">
+              <TipTapEditor
+                content={page.content || ''}
+                onUpdate={handleContentSave}
+                placeholder="Begin met het schrijven van de pagina inhoud..."
+                minHeight="200px"
+                editable={!isReadOnly}
+              />
+            </ErrorBoundary>
           </div>
         )}
 
         {/* Sections */}
         {sections.length > 0 && (
           <div className="mb-8">
-            <span className="text-xs font-medium text-ru-text-light uppercase tracking-wider block mb-4">
-              Secties
-            </span>
-            <div className="pl-4 border-l-2 border-ru-light-gray">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-medium text-ru-text-light uppercase tracking-wider">
+                Secties
+              </span>
+              {!isReadOnly && (
+                <label className="flex items-center gap-2 text-sm text-ru-text cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={!!page.useAccordion}
+                    onChange={() =>
+                      updatePageContent(parentCategory.id, page.id, { useAccordion: !page.useAccordion })
+                    }
+                    className="accent-ru-red-impact"
+                  />
+                  <ChevronDown size={14} className="text-ru-maroon" />
+                  Accordion weergave (inklapbaar in preview)
+                </label>
+              )}
+            </div>
+            <div className={`pl-4 border-l-2 ${page.useAccordion ? 'border-ru-red-impact' : 'border-ru-light-gray'}`}>
               {isReadOnly ? (
                 // Read-only mode: render without DnD context
                 sections.map((section) => (
@@ -193,7 +212,7 @@ export default function InlinePageEditor({ page, parentCategory, onBack, isReadO
       {/* Help text */}
       <p className="text-sm text-ru-text-light text-center mt-4">
         {isReadOnly
-          ? 'Alleen lezen - schakel naar "Nieuw (voorstel)" om te bewerken'
+          ? 'Alleen lezen — schakel naar Bewerken om wijzigingen te maken'
           : 'Klik op tekst om te bewerken | Wijzigingen worden automatisch opgeslagen'}
       </p>
     </div>

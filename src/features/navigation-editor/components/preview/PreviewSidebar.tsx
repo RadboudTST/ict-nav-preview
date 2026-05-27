@@ -1,73 +1,99 @@
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useNavigationStore } from '../../hooks';
+
+// Sibling sections under "Campusfaciliteiten & gebouwen" - in order they appear on ru.nl
+const SIBLING_SECTIONS_BEFORE = [
+  'Gebouwen en ruimtes',
+  'Eten en drinken',
+];
+
+const SIBLING_SECTIONS_AFTER = [
+  'Materialen lenen of inzien',
+  'Producten en diensten (in)kopen',
+  'Communicatie en promotie',
+  'Veiligheid en noodsituaties',
+];
 
 export default function PreviewSidebar() {
   const { categories, selectedPreviewId, setPreviewSelection } = useNavigationStore();
 
+  // Use categories in their current order from the store (respects user reordering)
+
   return (
-    <aside className="w-[260px] flex-shrink-0 bg-ru-light-gray/50">
-      <div className="py-6">
-        {/* Sidebar navigation header */}
-        <div className="px-5 mb-4">
-          <h2 className="text-lg font-bold text-ru-maroon border-b-2 border-ru-maroon pb-2">
+    <aside className="w-[260px] flex-shrink-0 bg-white pt-20 pb-6 pr-[30px]">
+      {/* Sidebar navigation */}
+      <nav>
+        {/* Parent section header with underline */}
+        <div className="mb-3">
+          <a
+            href="#"
+            className="text-[18px] leading-[22px] font-extrabold text-ru-mahogany hover:text-ru-red-impact block pb-2 border-b-2 border-ru-red-impact"
+          >
             Campusfaciliteiten & gebouwen
-          </h2>
+          </a>
         </div>
 
-        {/* Parent level - simulating ru.nl hierarchy */}
-        <nav>
-          {/* ICT section - expandable like ru.nl */}
-          <div className="border-l-4 border-ru-red-impact bg-white">
-            <button
-              onClick={() => setPreviewSelection(null)}
-              className={`w-full text-left px-5 py-3 font-semibold text-ru-red-impact flex items-center justify-between`}
-            >
-              <span>ICT</span>
-              <ChevronDown size={16} />
-            </button>
+        {/* Menu items */}
+        <ul>
+          {/* Siblings before ICT */}
+          {SIBLING_SECTIONS_BEFORE.map((section) => (
+            <li key={section}>
+              <a
+                href="#"
+                className="block py-[5px] text-[18px] leading-[24px] font-bold text-ru-maroon hover:text-ru-red-impact hover:underline"
+              >
+                {section}
+              </a>
+            </li>
+          ))}
 
-            {/* ICT sub-items - no chevrons, like ru.nl */}
-            <div className="bg-white border-t border-ru-border/50">
+          {/* ICT - active/expanded */}
+          <li>
+            <a
+              href="#"
+              className="block py-[5px] text-[18px] leading-[22px] text-ru-red-impact font-extrabold"
+              onClick={(e) => {
+                e.preventDefault();
+                setPreviewSelection(null);
+              }}
+            >
+              ICT
+            </a>
+
+            {/* ICT sub-items - nested with left border */}
+            <ul className="ml-3 pl-3 border-l border-ru-border mt-1">
               {categories.map((category) => {
                 const isSelected = selectedPreviewId === category.id;
                 return (
-                  <button
-                    key={category.id}
-                    onClick={() => setPreviewSelection(category.id)}
-                    className={`w-full text-left px-8 py-2.5 text-sm transition-colors relative ${
-                      isSelected
-                        ? 'text-ru-red-impact font-medium'
-                        : 'text-ru-maroon hover:text-ru-red-impact'
-                    }`}
-                  >
-                    {/* Red underline indicator for selected item */}
-                    {isSelected && (
-                      <span className="absolute left-8 bottom-0 right-5 h-0.5 bg-ru-red-impact" />
-                    )}
-                    {category.label}
-                  </button>
+                  <li key={category.id}>
+                    <button
+                      onClick={() => setPreviewSelection(category.id)}
+                      className={`w-full text-left py-[5px] text-[18px] leading-[24px] font-bold transition-colors border-b-2 hover:text-ru-red-impact ${
+                        isSelected
+                          ? 'text-ru-red-impact border-ru-red-impact'
+                          : 'text-ru-maroon border-transparent'
+                      }`}
+                    >
+                      {category.label}
+                    </button>
+                  </li>
                 );
               })}
-            </div>
-          </div>
+            </ul>
+          </li>
 
-          {/* Other sibling sections (collapsed, like ru.nl shows them) */}
-          <div className="mt-1">
-            <div className="px-5 py-3 text-ru-text-light text-sm hover:bg-white/50 cursor-pointer flex items-center justify-between">
-              <span>Afval en recycling</span>
-              <ChevronRight size={14} className="opacity-50" />
-            </div>
-            <div className="px-5 py-3 text-ru-text-light text-sm hover:bg-white/50 cursor-pointer flex items-center justify-between">
-              <span>Beveiliging en BHV</span>
-              <ChevronRight size={14} className="opacity-50" />
-            </div>
-            <div className="px-5 py-3 text-ru-text-light text-sm hover:bg-white/50 cursor-pointer flex items-center justify-between">
-              <span>Gebouwen en ruimtes</span>
-              <ChevronRight size={14} className="opacity-50" />
-            </div>
-          </div>
-        </nav>
-      </div>
+          {/* Siblings after ICT */}
+          {SIBLING_SECTIONS_AFTER.map((section) => (
+            <li key={section}>
+              <a
+                href="#"
+                className="block py-[5px] text-[18px] leading-[24px] font-bold text-ru-maroon hover:text-ru-red-impact hover:underline"
+              >
+                {section}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </aside>
   );
 }

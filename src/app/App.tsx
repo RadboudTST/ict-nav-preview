@@ -3,7 +3,7 @@ import { Eye, GitCompare } from 'lucide-react';
 import { Header, Sidebar, MainContent, Toolbar, PreviewLayout, ColumnsLayout } from '@/features/navigation-editor';
 import { CompareLayout, CompareLegend } from '@/features/navigation-editor/components/compare';
 import { useNavigationStore } from '@/features/navigation-editor/hooks';
-import { ToastContainer, ConfirmModal } from '@/components/ui';
+import { ToastContainer, ConfirmModal, toast, ErrorBoundary } from '@/components/ui';
 
 export default function App() {
   const { viewMode, setViewMode, layoutMode } = useNavigationStore();
@@ -21,35 +21,56 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [viewMode, setViewMode]);
 
+  // Listen for localStorage quota exceeded events
+  useEffect(() => {
+    const handleQuotaExceeded = () => {
+      toast.error(
+        'Opslagruimte vol — wijzigingen worden mogelijk niet opgeslagen. Exporteer uw werk als JSON en verwijder ongebruikte inhoud.',
+        { duration: 10000 }
+      );
+    };
+
+    window.addEventListener('storage-quota-exceeded', handleQuotaExceeded);
+    return () => window.removeEventListener('storage-quota-exceeded', handleQuotaExceeded);
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-ru-light-gray">
-      {/* Header with logo and breadcrumb */}
-      <Header />
+      {/* Header with logo and breadcrumb - only in edit/compare mode */}
+      {viewMode !== 'preview' && <Header />}
 
       {/* Toolbar - only in edit mode */}
       {viewMode === 'edit' && <Toolbar />}
 
       {/* Main content area */}
-      {viewMode === 'edit' && layoutMode === 'list' && (
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar with navigation tree */}
-          <Sidebar />
+      {viewMode === 'edit' && (
+        <ErrorBoundary name="EditMode">
+          {layoutMode === 'list' && (
+            <div className="flex flex-1 overflow-hidden">
+              {/* Sidebar with navigation tree */}
+              <Sidebar />
 
-          {/* Main content */}
-          <MainContent />
-        </div>
+              {/* Main content */}
+              <MainContent />
+            </div>
+          )}
+          {layoutMode === 'columns' && <ColumnsLayout />}
+        </ErrorBoundary>
       )}
 
-      {/* Columns layout */}
-      {viewMode === 'edit' && layoutMode === 'columns' && <ColumnsLayout />}
-
-      {viewMode === 'preview' && <PreviewLayout />}
+      {viewMode === 'preview' && (
+        <ErrorBoundary name="PreviewLayout" onReset={() => setViewMode('edit')}>
+          <PreviewLayout />
+        </ErrorBoundary>
+      )}
 
       {viewMode === 'compare' && (
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <CompareLegend />
-          <CompareLayout />
-        </div>
+        <ErrorBoundary name="CompareLayout" onReset={() => setViewMode('edit')}>
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <CompareLegend />
+            <CompareLayout />
+          </div>
+        </ErrorBoundary>
       )}
 
       {/* Mode indicators */}

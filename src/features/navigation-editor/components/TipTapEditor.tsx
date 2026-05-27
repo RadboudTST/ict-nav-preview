@@ -6,6 +6,9 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
+import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details';
+import { Extension } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { useEffect, useCallback, useState } from 'react';
 import {
   Bold,
@@ -16,6 +19,7 @@ import {
   Heading3,
   Link as LinkIcon,
   Table as TableIcon,
+  ListCollapse,
   Undo,
   Redo,
   Code,
@@ -81,6 +85,11 @@ function EditorToolbar({ editor }: { editor: Editor }) {
   const addLink = useCallback(() => {
     const url = window.prompt('URL invoeren:');
     if (url) {
+      // Block dangerous URL schemes (XSS vectors)
+      const trimmed = url.trim().toLowerCase();
+      if (trimmed.startsWith('javascript:') || trimmed.startsWith('data:') || trimmed.startsWith('vbscript:')) {
+        return;
+      }
       editor.chain().focus().setLink({ href: url }).run();
     }
   }, [editor]);
@@ -173,6 +182,19 @@ function EditorToolbar({ editor }: { editor: Editor }) {
       >
         <TableIcon size={16} />
       </ToolbarButton>
+      <ToolbarButton
+        onClick={() => {
+          if (editor.isActive('details')) {
+            editor.chain().focus().unsetDetails().run();
+          } else {
+            editor.chain().focus().setDetails().run();
+          }
+        }}
+        isActive={editor.isActive('details')}
+        title="Uitklapbaar blok (accordion)"
+      >
+        <ListCollapse size={16} />
+      </ToolbarButton>
 
       <div className="w-px h-6 bg-ru-border mx-1" />
 
@@ -194,6 +216,45 @@ function EditorToolbar({ editor }: { editor: Editor }) {
     </div>
   );
 }
+
+// Auto-open closed accordions when pressing Enter in the title.
+// This runs before the Details extension's keymap, so the content area
+// becomes visible before isNodeVisible() is checked.
+const DetailsAutoOpen = Extension.create({
+  name: 'detailsAutoOpen',
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey('detailsAutoOpen'),
+        props: {
+          handleKeyDown(view, event) {
+            if (event.key !== 'Enter') return false;
+            const { $from } = view.state.selection;
+            for (let d = $from.depth; d > 0; d--) {
+              if ($from.node(d).type.name === 'detailsSummary') {
+                const detailsDepth = d - 1;
+                if (detailsDepth >= 0 && $from.node(detailsDepth).type.name === 'details') {
+                  const detailsNode = $from.node(detailsDepth);
+                  if (!detailsNode.attrs.open) {
+                    const pos = $from.before(detailsDepth);
+                    view.dispatch(
+                      view.state.tr.setNodeMarkup(pos, undefined, {
+                        ...detailsNode.attrs,
+                        open: true,
+                      })
+                    );
+                  }
+                }
+                break;
+              }
+            }
+            return false;
+          },
+        },
+      }),
+    ];
+  },
+});
 
 export default function TipTapEditor({
   content,
@@ -218,7 +279,7 @@ export default function TipTapEditor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-ru-red-impact hover:underline',
+          class: 'text-[#E3000B] underline hover:text-[#730E04]',
         },
       }),
       Table.configure({
@@ -230,13 +291,25 @@ export default function TipTapEditor({
       TableRow,
       TableHeader.configure({
         HTMLAttributes: {
-          class: 'bg-ru-light-gray font-semibold text-left p-2 border border-ru-border',
+          class: 'font-bold text-left text-[#730E04]',
         },
       }),
       TableCell.configure({
         HTMLAttributes: {
-          class: 'p-2 border border-ru-border',
+          class: '',
         },
+      }),
+      DetailsAutoOpen,
+      Details.configure({
+        persist: true,
+        openClassName: 'is-open',
+        HTMLAttributes: { class: 'ru-accordion' },
+      }),
+      DetailsSummary.configure({
+        HTMLAttributes: { class: 'ru-accordion-title' },
+      }),
+      DetailsContent.configure({
+        HTMLAttributes: { class: 'ru-accordion-content' },
       }),
     ],
     content,
@@ -246,15 +319,15 @@ export default function TipTapEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none',
+        class: 'max-w-none focus:outline-none',
         style: minHeight ? `min-height: ${minHeight}` : '',
       },
     },
   });
 
-  // Sync content when it changes externally
+  // Sync content when it changes externally (skip if user is actively typing)
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
+    if (editor && content !== editor.getHTML() && !editor.isFocused) {
       editor.commands.setContent(content);
     }
   }, [content, editor]);

@@ -1,4 +1,4 @@
-import { Globe, Pencil, Eye, GitCompare, ChevronRight } from 'lucide-react';
+import { Globe, Pencil, Eye, GitCompare } from 'lucide-react';
 import { useNavigationStore } from '../hooks';
 
 export default function Header() {
@@ -66,34 +66,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Breadcrumb - only show in edit mode */}
-      {viewMode === 'edit' && (
-        <div className="bg-ru-light-gray border-b border-ru-border">
-          <div className="max-w-[1200px] mx-auto px-6 py-2">
-            <nav aria-label="Breadcrumb">
-              <ol className="flex items-center gap-1 text-sm">
-                <li>
-                  <span className="text-ru-blue hover:underline cursor-pointer">Home</span>
-                </li>
-                <li className="text-ru-gray"><ChevronRight size={12} /></li>
-                <li>
-                  <span className="text-ru-blue hover:underline cursor-pointer">Services</span>
-                </li>
-                <li className="text-ru-gray"><ChevronRight size={12} /></li>
-                <li>
-                  <span className="text-ru-blue hover:underline cursor-pointer">
-                    Campusfaciliteiten & gebouwen
-                  </span>
-                </li>
-                <li className="text-ru-gray"><ChevronRight size={12} /></li>
-                <li>
-                  <span className="text-ru-text font-medium">ICT</span>
-                </li>
-              </ol>
-            </nav>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

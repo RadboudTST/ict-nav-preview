@@ -1,4 +1,4 @@
-import { FileText, CirclePlus, CircleMinus, ArrowRightLeft, Pencil, Copy } from 'lucide-react';
+import { FileText, ExternalLink, CirclePlus, CircleMinus, ArrowRightLeft, Copy } from 'lucide-react';
 import { PageItem, DifferenceType } from '../../types/navigation.types';
 import { useNavigationStore } from '../../hooks';
 
@@ -43,12 +43,6 @@ export default function ComparePageItem({
       bgClass: 'bg-amber-100',
       textClass: 'text-amber-700 font-medium',
     },
-    renamed: {
-      icon: Pencil,
-      iconClass: 'text-blue-600',
-      bgClass: 'bg-blue-100',
-      textClass: 'text-blue-700 font-medium',
-    },
     unchanged: {
       icon: null,
       iconClass: '',
@@ -60,11 +54,31 @@ export default function ComparePageItem({
   const config = diffConfig[diffType];
   const DiffIcon = config.icon;
 
+  // Determine icon based on cross-link status
+  const PageIcon = page.crossLink ? ExternalLink : FileText;
+  const iconColor = page.crossLink
+    ? 'text-ru-blue'
+    : diffType === 'unchanged'
+      ? 'text-ru-gray'
+      : config.iconClass;
+
   return (
     <div className="flex items-center gap-2 p-1.5 rounded text-xs">
-      <FileText className={`w-3 h-3 flex-shrink-0 ${diffType === 'unchanged' ? 'text-ru-gray' : config.iconClass}`} />
+      <PageIcon className={`w-3 h-3 flex-shrink-0 ${iconColor}`} />
 
-      <span className={`flex-1 ${config.textClass}`}>{page.title}</span>
+      <span className={`flex-1 ${config.textClass} ${page.crossLink ? 'italic' : ''}`}>
+        {page.title}
+      </span>
+
+      {/* Cross-link indicator badge */}
+      {page.crossLink && (
+        <span
+          className="px-1 py-0.5 rounded bg-ru-blue/10 text-ru-blue text-[10px] font-medium"
+          title={page.url || 'Externe link'}
+        >
+          extern
+        </span>
+      )}
 
       {/* Duplicate indicator */}
       {isDuplicate && (

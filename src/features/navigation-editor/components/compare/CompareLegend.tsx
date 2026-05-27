@@ -1,4 +1,4 @@
-import { CirclePlus, CircleMinus, ArrowRightLeft, Pencil, Copy } from 'lucide-react';
+import { CirclePlus, CircleMinus, ArrowRightLeft, Copy, ExternalLink } from 'lucide-react';
 
 const legendItems = [
   {
@@ -20,16 +20,16 @@ const legendItems = [
     bgClass: 'bg-amber-100',
   },
   {
-    icon: Pencil,
-    label: 'Hernoemd',
-    iconClass: 'text-blue-600',
-    bgClass: 'bg-blue-100',
-  },
-  {
     icon: Copy,
     label: 'Duplicaat',
     iconClass: 'text-purple-600',
     bgClass: 'bg-purple-100',
+  },
+  {
+    icon: ExternalLink,
+    label: 'Externe link',
+    iconClass: 'text-ru-blue',
+    bgClass: 'bg-ru-blue/10',
   },
 ];
 

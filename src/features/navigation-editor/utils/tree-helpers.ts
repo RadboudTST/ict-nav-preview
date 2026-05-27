@@ -4,10 +4,16 @@ import { Category } from '../types/navigation.types';
 export { arrayMove } from '@dnd-kit/sortable';
 
 /**
- * Generate a unique ID for new items
+ * Generate a unique ID for new items.
+ * Falls back to crypto.getRandomValues() for non-secure contexts (HTTP).
  */
 export function generateId(): string {
-  return `item-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `item-${crypto.randomUUID()}`;
+  }
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+  return `item-${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
 }
 
 /**

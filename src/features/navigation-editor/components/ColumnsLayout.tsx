@@ -70,7 +70,7 @@ export default function ColumnsLayout() {
                 : 'bg-ru-green/10 text-ru-green'
             }`}
           >
-            {activeStructure === 'current' ? 'Huidig (ru.nl)' : 'Nieuw (voorstel)'}
+            {activeStructure === 'current' ? 'RU.nl' : 'Bewerken'}
           </span>
           {isReadOnly && (
             <span className="px-3 py-1 rounded-full text-xs font-medium bg-ru-light-gray text-ru-text-light">

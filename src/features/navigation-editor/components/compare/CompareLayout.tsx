@@ -36,8 +36,8 @@ export default function CompareLayout() {
         className="flex-1 border-r-2 border-ru-border overflow-auto"
       >
         <CompareColumn
-          title="Huidige structuur"
-          subtitle="Zoals nu op ru.nl"
+          title="RU.nl (origineel)"
+          subtitle="Huidige structuur"
           categories={structures.current}
           variant="current"
         />
@@ -50,8 +50,8 @@ export default function CompareLayout() {
         className="flex-1 overflow-auto"
       >
         <CompareColumn
-          title="Nieuwe structuur"
-          subtitle="Voorgestelde indeling"
+          title="Jouw voorstel"
+          subtitle="Bewerkbare versie"
           categories={structures.proposed}
           variant="proposed"
         />

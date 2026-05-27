@@ -101,10 +101,12 @@ export default function EditableText({
         type="text"
         value={editValue}
         onChange={(e) => setEditValue(e.target.value)}
+        maxLength={500}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         className={`px-1 py-0.5 border border-ru-blue rounded bg-white focus:outline-none focus:ring-2 focus:ring-ru-blue ${className}`}
         placeholder={placeholder}
+        aria-label={`Bewerk ${placeholder.toLowerCase().replace('...', '').trim() || 'tekst'}`}
       />
     );
   }
@@ -112,8 +114,17 @@ export default function EditableText({
   return (
     <span
       onDoubleClick={disabled ? undefined : startEditing}
+      onKeyDown={disabled ? undefined : (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          startEditing();
+        }
+      }}
       className={`${disabled ? 'cursor-default' : 'cursor-text'} ${className}`}
       title={disabled ? undefined : 'Dubbelklik om te bewerken'}
+      role={disabled ? undefined : 'button'}
+      tabIndex={disabled ? undefined : 0}
+      aria-label={disabled ? value : `${value || placeholder} - dubbelklik om te bewerken`}
     >
       {value || placeholder}
     </span>

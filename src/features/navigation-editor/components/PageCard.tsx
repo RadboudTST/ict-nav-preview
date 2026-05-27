@@ -1,6 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, X, ArrowRight } from 'lucide-react';
+import { GripVertical, X, ArrowRight, ExternalLink } from 'lucide-react';
 import { PageItem } from '../types/navigation.types';
 import { useNavigationStore } from '../hooks';
 import { confirm } from '@/components/ui';
@@ -28,6 +28,7 @@ export default function PageCard({ page, parentId, onDelete, isReadOnly = false 
       type: 'page',
       parentId,
     },
+    disabled: isReadOnly,
   });
 
   const style = {
@@ -99,7 +100,10 @@ export default function PageCard({ page, parentId, onDelete, isReadOnly = false 
       <div className="pl-4 pr-6">
         {/* Title with arrow */}
         <div className="flex items-center gap-2 mb-2">
-          <span className="font-semibold text-ru-red-impact hover:underline flex-1">
+          {page.crossLink && (
+            <ExternalLink size={14} className="text-ru-blue flex-shrink-0" />
+          )}
+          <span className={`font-semibold text-ru-red-impact hover:underline flex-1 ${page.crossLink ? 'italic' : ''}`}>
             {page.title || 'Naamloze pagina'}
           </span>
           <ArrowRight size={16} className="text-ru-red-impact flex-shrink-0" />
@@ -112,6 +116,11 @@ export default function PageCard({ page, parentId, onDelete, isReadOnly = false 
 
         {/* Content indicator */}
         <div className="flex items-center gap-2 mt-2 text-xs text-ru-gray">
+          {page.crossLink && (
+            <span className="bg-ru-blue/10 text-ru-blue px-2 py-0.5 rounded">
+              Externe link
+            </span>
+          )}
           {page.content && (
             <span className="bg-ru-light-gray px-2 py-0.5 rounded">
               Content

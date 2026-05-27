@@ -139,6 +139,7 @@ export default function CategoryItem({ category, isReadOnly = false }: CategoryI
             className={`drag-handle absolute -left-6 top-1/2 -translate-y-1/2 p-0.5 rounded transition-opacity ${
               isHovered ? 'opacity-100' : 'opacity-0'
             }`}
+            aria-hidden="true"
           >
             <GripVertical size={18} className="text-ru-gray" />
           </div>

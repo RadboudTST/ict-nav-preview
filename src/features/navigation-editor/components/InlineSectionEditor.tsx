@@ -2,6 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { ContentSection } from '../types/navigation.types';
+import { confirm } from '@/components/ui';
 import TipTapInlineField from './TipTapInlineField';
 import TipTapEditor from './TipTapEditor';
 
@@ -26,6 +27,7 @@ export default function InlineSectionEditor({ section, onUpdate, onDelete, isRea
       type: 'section',
       section,
     },
+    disabled: isReadOnly,
   });
 
   const style = {
@@ -41,9 +43,15 @@ export default function InlineSectionEditor({ section, onUpdate, onDelete, isRea
     onUpdate({ content: newContent });
   };
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
+  const handleDeleteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Weet je zeker dat je deze sectie wilt verwijderen?')) {
+    const confirmed = await confirm({
+      title: 'Sectie verwijderen',
+      message: `Weet je zeker dat je "${section.title || 'deze sectie'}" wilt verwijderen?`,
+      confirmLabel: 'Verwijderen',
+      variant: 'danger',
+    });
+    if (confirmed) {
       onDelete();
     }
   };

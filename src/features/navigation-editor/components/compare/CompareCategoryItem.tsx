@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, CirclePlus, CircleMinus, ArrowRightLeft, Pencil } from 'lucide-react';
+import { ChevronDown, ChevronRight, CirclePlus, CircleMinus, ArrowRightLeft } from 'lucide-react';
 import { Category, DifferenceType } from '../../types/navigation.types';
 import { useNavigationStore } from '../../hooks';
 import ComparePageItem from './ComparePageItem';
@@ -47,13 +47,6 @@ export default function CompareCategoryItem({
       containerClass: 'bg-amber-50 border-l-4 border-amber-500',
       labelClass: 'text-amber-700',
     },
-    renamed: {
-      icon: Pencil,
-      iconClass: 'text-blue-600',
-      bgClass: 'bg-blue-100',
-      containerClass: 'bg-blue-50 border-l-4 border-blue-500',
-      labelClass: 'text-blue-700',
-    },
     unchanged: {
       icon: null,
       iconClass: '',
@@ -73,6 +66,8 @@ export default function CompareCategoryItem({
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-2 w-full p-2 hover:bg-black/5 rounded text-left"
+        aria-expanded={isExpanded}
+        aria-label={`${category.label} ${isExpanded ? 'inklappen' : 'uitklappen'}`}
       >
         {isExpanded ? (
           <ChevronDown className="w-4 h-4 text-ru-gray flex-shrink-0" />

@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight, ExternalLink } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useNavigationStore } from '../../hooks';
 import { findCategoryById } from '../../utils/tree-helpers';
 import { ictRootPage } from '../../data/initial-structure';
 import { Category, PageItem } from '../../types/navigation.types';
 import PreviewPageCard from './PreviewPageCard';
 import PreviewPageDetail from './PreviewPageDetail';
+import AccordionSection from './AccordionSection';
+import HtmlPreview from '../HtmlPreview';
 
 export default function PreviewMainContent() {
   const { categories, selectedPreviewId, setPreviewSelection } = useNavigationStore();
+
   const [viewingPage, setViewingPage] = useState<{ page: PageItem; parentId: string } | null>(null);
 
   // Reset page view when category selection changes
@@ -57,46 +60,38 @@ export default function PreviewMainContent() {
   if (!selectedPreviewId) {
     return (
       <main className="flex-1 overflow-y-auto bg-white min-w-0">
-        <div className="w-full max-w-4xl px-8 py-6">
-          {/* Breadcrumb */}
-          <nav className="text-sm text-ru-text-light mb-6 flex items-center gap-1.5 flex-wrap">
-            <span className="hover:text-ru-red-impact hover:underline cursor-pointer">Home</span>
-            <ChevronRight size={12} className="text-ru-gray" />
-            <span className="hover:text-ru-red-impact hover:underline cursor-pointer">Services</span>
-            <ChevronRight size={12} className="text-ru-gray" />
-            <span className="hover:text-ru-red-impact hover:underline cursor-pointer">Campusfaciliteiten & gebouwen</span>
-            <ChevronRight size={12} className="text-ru-gray" />
-            <span className="text-ru-text font-medium">ICT</span>
-          </nav>
-
+        <div className="w-full max-w-[800px] py-6 px-8">
           {/* Page title */}
-          <h1 className="text-[42px] font-bold text-ru-red-impact leading-tight">
+          <h1 className="text-[40px] font-extrabold text-ru-red-impact leading-[40px] tracking-tight">
             {ictRootPage.title}
           </h1>
-          <div className="w-24 h-1 bg-ru-red-impact mt-2 mb-6" />
+          <div className="w-20 h-1 bg-ru-red-impact mt-2 mb-5" />
 
           {/* Intro text */}
-          <p className="text-[18px] text-ru-text leading-relaxed mb-8">
+          <p className="text-[16px] text-ru-text leading-relaxed mb-6">
             {ictRootPage.description}
           </p>
 
-          {/* Banner - dark red like ru.nl */}
-          <div className="bg-ru-berry text-white px-6 py-4 mb-8 flex items-center justify-between">
+          {/* Banner - dark berry background like ru.nl */}
+          <a
+            href="#"
+            className="bg-ru-berry text-white px-5 py-4 mb-6 flex items-center justify-between hover:bg-ru-maroon transition-colors"
+          >
             <span className="font-medium">{ictRootPage.banner.title}</span>
-            <ExternalLink size={18} className="opacity-80" />
-          </div>
+            <ArrowRight size={18} />
+          </a>
 
           {/* Ook veel bekeken - with bullet separators */}
-          <div className="mb-10">
-            <h2 className="text-lg font-semibold text-ru-maroon mb-3">Ook veel bekeken</h2>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <div className="mb-6">
+            <p className="text-[15px] text-ru-text mb-1">Ook veel bekeken</p>
+            <div className="flex flex-wrap items-center">
               {ictRootPage.quickLinks.map((link, index) => (
                 <span key={link.label} className="flex items-center">
-                  <span className="text-ru-red-impact hover:underline cursor-pointer">
+                  <a href="#" className="text-[15px] text-ru-red-impact hover:underline">
                     {link.label}
-                  </span>
+                  </a>
                   {index < ictRootPage.quickLinks.length - 1 && (
-                    <span className="text-ru-gray mx-2">•</span>
+                    <span className="text-ru-text mx-2">•</span>
                   )}
                 </span>
               ))}
@@ -104,32 +99,35 @@ export default function PreviewMainContent() {
           </div>
 
           {/* Category buttons grid - matching ru.nl style */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-12">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 mb-8">
             {categories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setPreviewSelection(category.id)}
-                className="border-2 border-ru-red-impact text-ru-red-impact px-5 py-3.5 text-left font-medium hover:bg-ru-red-impact hover:text-white transition-colors flex items-center justify-between group"
+                className="border border-ru-red-impact text-ru-red-impact px-4 py-3 text-left text-[15px] font-medium hover:bg-ru-red-impact hover:text-white transition-colors flex items-center justify-between group"
               >
                 <span>{category.label}</span>
-                <ChevronRight size={18} className="opacity-70 group-hover:opacity-100 transition-opacity" />
+                <ArrowRight size={16} className="opacity-70 group-hover:opacity-100 flex-shrink-0 ml-2" />
               </button>
             ))}
           </div>
 
-          {/* Featured cards - as simple list items like ru.nl */}
-          <div className="border-t border-ru-border pt-8">
-            <div className="space-y-6">
-              {ictRootPage.featuredCards.map((card) => (
-                <div key={card.id} className="group cursor-pointer">
-                  <h3 className="text-lg font-semibold text-ru-red-impact group-hover:underline inline-flex items-center gap-2">
+          {/* Featured cards - 2 column grid like ru.nl */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 pt-4">
+            {ictRootPage.featuredCards.map((card) => (
+              <div key={card.id} className="group">
+                <h3 className="mb-1">
+                  <a
+                    href="#"
+                    className="text-[17px] font-bold text-ru-red-impact hover:underline inline-flex items-center gap-1"
+                  >
                     {card.title}
-                    <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </h3>
-                  <p className="text-ru-text mt-1 leading-relaxed">{card.description}</p>
-                </div>
-              ))}
-            </div>
+                    <ArrowRight size={14} className="flex-shrink-0" />
+                  </a>
+                </h3>
+                <p className="text-[14px] text-ru-text leading-relaxed">{card.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </main>
@@ -142,44 +140,56 @@ export default function PreviewMainContent() {
 
     return (
       <main className="flex-1 overflow-y-auto bg-white min-w-0">
-        <div className="w-full max-w-4xl px-8 py-6">
-          {/* Breadcrumb */}
-          <nav className="text-sm text-ru-text-light mb-6 flex items-center gap-1.5 flex-wrap">
-            <span className="hover:text-ru-red-impact hover:underline cursor-pointer">Home</span>
-            <ChevronRight size={12} className="text-ru-gray" />
-            <span className="hover:text-ru-red-impact hover:underline cursor-pointer">Services</span>
-            <ChevronRight size={12} className="text-ru-gray" />
-            <span className="hover:text-ru-red-impact hover:underline cursor-pointer">Campusfaciliteiten & gebouwen</span>
-            <ChevronRight size={12} className="text-ru-gray" />
-            <button
-              onClick={() => setPreviewSelection(null)}
-              className="hover:text-ru-red-impact hover:underline"
-            >
-              ICT
-            </button>
-            <ChevronRight size={12} className="text-ru-gray" />
-            <span className="text-ru-text font-medium">{selectedCategory.label}</span>
-          </nav>
-
+        <div className="w-full max-w-[800px] py-6 px-8">
           {/* Page title */}
-          <h1 className="text-[42px] font-bold text-ru-red-impact leading-tight">
+          <h1 className="text-[40px] font-extrabold text-ru-red-impact leading-[40px] tracking-tight">
             {selectedCategory.label}
           </h1>
-          <div className="w-24 h-1 bg-ru-red-impact mt-2 mb-6" />
+          <div className="w-20 h-1 bg-ru-red-impact mt-2 mb-5" />
 
           {/* Category description */}
           {selectedCategory.description && (
-            <p className="text-[18px] text-ru-text leading-relaxed mb-8">
+            <p className="text-[16px] text-ru-text leading-relaxed mb-6">
               {selectedCategory.description}
             </p>
           )}
 
+          {/* Category rich-text content */}
+          {selectedCategory.content && (
+            <div className="ru-rich-text mb-6">
+              <HtmlPreview content={selectedCategory.content} />
+            </div>
+          )}
+
+          {/* Category sections — accordion or flat */}
+          {selectedCategory.sections && selectedCategory.sections.length > 0 && (
+            selectedCategory.useAccordion ? (
+              <AccordionSection
+                key={selectedCategory.id}
+                sections={selectedCategory.sections}
+              />
+            ) : (
+              <div className="mt-10 mb-10 space-y-10">
+                {selectedCategory.sections.map((section) => (
+                  <section key={section.id}>
+                    <h2 className="text-[26px] font-extrabold text-ru-maroon leading-[26px] tracking-tight mb-4">
+                      {section.title}
+                    </h2>
+                    <div className="ru-rich-text">
+                      <HtmlPreview content={section.content} />
+                    </div>
+                  </section>
+                ))}
+              </div>
+            )
+          )}
+
           {/* Horizontal separator like ru.nl */}
-          <hr className="border-ru-border mb-8" />
+          <hr className="border-ru-border mb-6" />
 
           {/* Pages grid - 2 columns like ru.nl */}
           {pages.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
               {pages.map((page) => (
                 <PreviewPageCard
                   key={page.id}

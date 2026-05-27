@@ -1,16 +1,36 @@
+import { useMemo } from 'react';
+import DOMPurify from 'dompurify';
+
 interface HtmlPreviewProps {
   content: string;
   className?: string;
 }
 
 /**
- * Renders HTML content with proper styling
- * Used for displaying content from TipTap editor
- *
- * Note: Content is trusted as it comes from our own scraper and editor.
- * The scraper only extracts text content from ru.nl pages.
+ * DOMPurify config matching the import sanitization in export-helpers.ts.
+ * Blocks script injection vectors while allowing standard HTML from TipTap.
+ */
+const SANITIZE_CONFIG = {
+  FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'style', 'svg', 'math'],
+};
+
+// Hook: strip all on* event handler attributes
+DOMPurify.addHook('uponSanitizeAttribute', (_node, data) => {
+  if (data.attrName.startsWith('on')) {
+    data.keepAttr = false;
+  }
+});
+
+/**
+ * Renders HTML content with DOMPurify sanitization.
+ * Used for displaying content from TipTap editor, scraped data, and imports.
  */
 export default function HtmlPreview({ content, className = '' }: HtmlPreviewProps) {
+  const sanitized = useMemo(
+    () => (content ? DOMPurify.sanitize(content, SANITIZE_CONFIG) : ''),
+    [content]
+  );
+
   if (!content) {
     return (
       <div className={`text-ru-text-light italic ${className}`}>
@@ -19,12 +39,10 @@ export default function HtmlPreview({ content, className = '' }: HtmlPreviewProp
     );
   }
 
-  // Content is from our own TipTap editor and scraper - trusted source
-  // Using tiptap class to inherit the same heading/content styles as the editor
   return (
     <div
       className={`tiptap prose prose-lg max-w-none text-ru-text ${className}`}
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: sanitized }}
     />
   );
 }
