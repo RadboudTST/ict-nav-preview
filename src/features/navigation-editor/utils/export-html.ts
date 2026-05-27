@@ -15,6 +15,16 @@ function escapeHtml(str: string): string {
 }
 
 /**
+ * Strip the `open` attribute from all <details> tags in rich HTML content,
+ * so TipTap Details accordions start collapsed in the exported preview.
+ */
+function collapseDetails(html: string): string {
+  return html.replace(/<details(\s[^>]*)?\s+open(\s[^>]*)?>/gi, (match, before = '', after = '') => {
+    return `<details${before}${after}>`;
+  });
+}
+
+/**
  * Generate a standalone HTML file with the navigation structure preview.
  * The HTML file includes all styles inline and works without a server.
  */
@@ -756,7 +766,7 @@ export function generateStandaloneHtml(
             <h1 class="page-title">${escapeHtml(cat.label)}</h1>
             ${cat.description ? `<p class="intro-text">${escapeHtml(cat.description)}</p>` : ''}
             <hr class="separator-line">
-            ${cat.content ? `<div class="page-content">${cat.content}</div>` : ''}
+            ${cat.content ? `<div class="page-content">${collapseDetails(cat.content)}</div>` : ''}
             ${(cat.sections && cat.sections.length > 0) ? (
               cat.useAccordion ? `
             <div style="margin-top: 40px;">
@@ -766,7 +776,7 @@ export function generateStandaloneHtml(
                   <span class="accordion-title">${escapeHtml(section.title)}</span>
                   <span class="accordion-arrow">↓</span>
                 </button>
-                <div class="accordion-body"><div class="accordion-body-inner"><div class="accordion-body-content section-content">${section.content}</div></div></div>
+                <div class="accordion-body"><div class="accordion-body-inner"><div class="accordion-body-content section-content">${collapseDetails(section.content)}</div></div></div>
               </div>
               `).join('')}
             </div>
@@ -775,7 +785,7 @@ export function generateStandaloneHtml(
               ${cat.sections.map(section => `
               <section style="margin-bottom: 40px;">
                 <h2 style="font-size: 26px; font-weight: 800; color: var(--ru-maroon); line-height: 26px; letter-spacing: -0.025em; margin-bottom: 16px;">${escapeHtml(section.title)}</h2>
-                <div class="section-content">${section.content}</div>
+                <div class="section-content">${collapseDetails(section.content)}</div>
               </section>
               `).join('')}
             </div>
@@ -798,7 +808,7 @@ export function generateStandaloneHtml(
             ${page.intro ? `<p class="intro-text">${escapeHtml(page.intro)}</p>` :
               page.description ? `<p class="intro-text">${escapeHtml(page.description)}</p>` : ''}
             <hr class="separator-line">
-            ${page.content ? `<div class="page-content">${page.content}</div>` : ''}
+            ${page.content ? `<div class="page-content">${collapseDetails(page.content)}</div>` : ''}
             ${(page.sections && page.sections.length > 0) ? (
               page.useAccordion ? `
             <div style="margin-top: 40px;">
@@ -808,7 +818,7 @@ export function generateStandaloneHtml(
                   <span class="accordion-title">${escapeHtml(section.title)}</span>
                   <span class="accordion-arrow">↓</span>
                 </button>
-                <div class="accordion-body"><div class="accordion-body-inner"><div class="accordion-body-content section-content">${section.content}</div></div></div>
+                <div class="accordion-body"><div class="accordion-body-inner"><div class="accordion-body-content section-content">${collapseDetails(section.content)}</div></div></div>
               </div>
               `).join('')}
             </div>
@@ -817,7 +827,7 @@ export function generateStandaloneHtml(
               ${page.sections.map(section => `
               <section style="margin-bottom: 40px;">
                 <h2 style="font-size: 26px; font-weight: 800; color: var(--ru-maroon); line-height: 26px; letter-spacing: -0.025em; margin-bottom: 16px;">${escapeHtml(section.title)}</h2>
-                <div class="section-content">${section.content}</div>
+                <div class="section-content">${collapseDetails(section.content)}</div>
               </section>
               `).join('')}
             </div>
