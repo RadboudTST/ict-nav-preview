@@ -190,40 +190,40 @@ export function generateStandaloneHtml(
       padding: 80px 30px 0 0;
     }
     .sidebar-header {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 800;
       color: var(--ru-mahogany);
-      line-height: 22px;
+      line-height: 20px;
       padding-bottom: 8px;
       border-bottom: 2px solid var(--ru-red-impact);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .sidebar-nav > li { margin-bottom: 0; }
     .sidebar-nav > li > a, .sidebar-nav > li > button {
       display: block;
-      padding: 5px 0;
-      font-size: 18px;
+      padding: 4px 0;
+      font-size: 15px;
       font-weight: 700;
       color: var(--ru-maroon);
-      line-height: 24px;
+      line-height: 22px;
       text-align: left;
       width: 100%;
     }
     .sidebar-nav > li > a:hover { color: var(--ru-red-impact); text-decoration: underline; }
-    .sidebar-nav > li > button.sidebar-ict { color: var(--ru-red-impact); font-weight: 800; line-height: 22px; }
+    .sidebar-nav > li > button.sidebar-ict { color: var(--ru-red-impact); font-weight: 800; font-size: 15px; line-height: 22px; }
     .sidebar-subnav {
-      margin-left: 12px;
-      padding-left: 12px;
-      border-left: 1px solid var(--ru-border);
-      margin-top: 4px;
+      margin-left: 0;
+      padding-left: 14px;
+      border-left: 3px solid var(--ru-red-impact);
+      margin-top: 0;
     }
     .sidebar-subnav li { margin-bottom: 0; }
     .sidebar-subnav button {
-      padding: 5px 0;
-      font-size: 18px;
+      padding: 4px 0;
+      font-size: 15px;
       font-weight: 700;
       color: var(--ru-maroon);
-      line-height: 24px;
+      line-height: 22px;
       text-align: left;
       width: 100%;
     }
