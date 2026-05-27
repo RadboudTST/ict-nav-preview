@@ -189,51 +189,79 @@ export function generateStandaloneHtml(
       flex-shrink: 0;
       padding: 80px 30px 0 0;
     }
+    /* Heading: "Campusfaciliteiten & gebouwen" — 18px/800/#4a0004, red underline via pseudo */
     .sidebar-header {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 800;
       color: var(--ru-mahogany);
-      line-height: 20px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--ru-red-impact);
-      margin-bottom: 8px;
+      line-height: 22px;
+      letter-spacing: -1px;
+      display: block;
+      position: relative;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
     }
-    .sidebar-nav > li { margin-bottom: 0; }
+    .sidebar-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--ru-maroon);
+    }
+    /* Level-1 items: Gebouwen, Eten, ICT — 18px/700/#730e04, gap via li+li */
+    .sidebar-nav { margin: 10px 0 10px 20px; padding: 0; }
+    .sidebar-nav > li { margin: 0; padding: 0; }
+    .sidebar-nav > li + li { margin-top: 5px; }
     .sidebar-nav > li > a, .sidebar-nav > li > button {
       display: block;
-      padding: 4px 0;
-      font-size: 15px;
+      padding: 0;
+      font-size: 18px;
       font-weight: 700;
       color: var(--ru-maroon);
-      line-height: 22px;
+      line-height: 24px;
+      letter-spacing: -1px;
       text-align: left;
       width: 100%;
     }
-    .sidebar-nav > li > a:hover { color: var(--ru-red-impact); text-decoration: underline; }
-    .sidebar-nav > li > button.sidebar-ict { color: var(--ru-red-impact); font-weight: 800; font-size: 15px; line-height: 22px; }
+    .sidebar-nav > li > a:hover, .sidebar-nav > li > button:hover { color: var(--ru-red-impact); }
+    /* ICT active item */
+    .sidebar-nav > li > button.sidebar-ict {
+      color: var(--ru-red-impact);
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 24px;
+      letter-spacing: -1px;
+    }
+    /* Level-2 sub-items: 16px/400/#4a0004, indented 20px, NO border */
     .sidebar-subnav {
-      margin-left: 0;
-      padding-left: 14px;
-      border-left: 3px solid var(--ru-red-impact);
-      margin-top: 0;
+      margin: 10px 0 10px 20px;
+      padding: 0;
+      border-left: none;
     }
-    .sidebar-subnav li { margin-bottom: 0; }
+    .sidebar-subnav li { margin: 0; padding: 0; }
+    .sidebar-subnav li + li { margin-top: 0; }
     .sidebar-subnav button {
-      padding: 4px 0;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--ru-maroon);
+      padding: 0;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--ru-mahogany);
       line-height: 22px;
+      letter-spacing: -1px;
       text-align: left;
       width: 100%;
+      display: block;
     }
     .sidebar-subnav button:hover { color: var(--ru-red-impact); text-decoration: underline; }
-    .sidebar-subnav button.active { color: var(--ru-red-impact); }
+    .sidebar-subnav button.active { color: var(--ru-red-impact); font-weight: 700; }
 
-    /* Main Content */
+    /* Main Content — border-left divider like ru.nl */
     .main-content {
       flex: 1;
       min-width: 0;
+      border-left: 1px solid #d7d7d7;
+      padding-left: 50px;
     }
     .page-title {
       font-size: 40px;
