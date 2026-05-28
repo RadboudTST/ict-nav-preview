@@ -101,7 +101,7 @@ export function generateStandaloneHtml(
     }
 
     /* Layout */
-    .page-wrapper { display: flex; flex-direction: column; min-height: 100vh; background: #fff; max-width: 1400px; margin: 0 auto; }
+    .page-wrapper { display: flex; flex-direction: column; min-height: 100vh; background: #fff; max-width: 1400px; margin: 0 auto; position: relative; }
     .content-wrapper { flex: 1; }
     .container { max-width: 1240px; margin: 0 auto; padding: 0 30px; }
 
@@ -180,11 +180,18 @@ export function generateStandaloneHtml(
     }
     .search-box button:hover { color: var(--ru-red-impact); }
 
-    /* Breadcrumb */
+    /* Breadcrumb — absolutely positioned so it doesn't push main-layout down.
+       top: 124px (after header 62+nav 62) + 30px padding = 154px, matching ru.nl */
     .breadcrumb-bar {
-      background: transparent;
-      padding: 30px 0 48px;  /* 30px top = main-wrapper padding-top (breadcrumb at 154px); 48px bottom ≈ 60px gap to content */
+      position: absolute;
+      top: 124px;
+      left: 0;
+      right: 0;
+      padding: 30px 0 0;
+      pointer-events: none;
+      z-index: 1;
     }
+    .breadcrumb-bar * { pointer-events: auto; }
     /* Breadcrumb uses same width bounds as main-layout; inner nav padded to align with content column */
     .breadcrumb-bar .breadcrumb-inner {
       max-width: 1240px;
@@ -197,12 +204,12 @@ export function generateStandaloneHtml(
     .breadcrumb .current { color: #666666; }
     .breadcrumb .chevron { color: #aaa; font-size: 13px; font-style: normal; }
 
-    /* Main Layout — padding-top:0 because breadcrumb-bar above already has 30px top padding */
+    /* Main Layout — matches ru.nl .l-main-wrapper; breadcrumb is absolutely positioned above */
     .main-layout {
       display: flex;
       max-width: 1240px;
       margin: 0 auto;
-      padding: 0 30px 110px;
+      padding: 30px 30px 110px;
     }
 
     /* Sidebar */
@@ -506,13 +513,12 @@ export function generateStandaloneHtml(
     }
     .footer-secondary-links a { color: var(--ru-red-impact); text-decoration: underline; }
     .footer-secondary-links a:hover { color: var(--ru-maroon); }
-    /* Logo row: aligns logo with content column, matching ru.nl .footer__logo */
+    /* Logo row: ru.nl logo left=1029.5 in wrapper left=677.5 → offset=352px */
     .footer-logo-block {
       max-width: 1240px;
       margin: 10px auto 0;
-      padding-left: 260px;  /* skip sidebar width → logo aligns with content column */
     }
-    .footer-logo { height: 55px; display: block; }
+    .footer-logo { height: 55px; display: block; margin-left: 352px; }
 
     /* Separator */
     .separator-line {
