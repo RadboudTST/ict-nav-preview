@@ -190,7 +190,7 @@ export function generateStandaloneHtml(
       margin: 0 auto;
       padding: 0 30px;
     }
-    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 15px; margin-left: 260px; }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 15px; margin-left: 310px; }
     .breadcrumb a { color: #666666; text-decoration: underline; }
     .breadcrumb a:hover { color: var(--ru-red-impact); }
     .breadcrumb .current { color: #666666; }
