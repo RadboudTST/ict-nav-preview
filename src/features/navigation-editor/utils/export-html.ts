@@ -131,9 +131,10 @@ export function generateStandaloneHtml(
     .utility-nav a:first-child { padding-left: 0; }
     .utility-nav a:hover { text-decoration: underline; }
 
-    /* Header - Navigation Bar (main nav left + lang/search right) */
+    /* Header - Navigation Bar (main nav left + lang/search right) — 62px tall matching ru.nl .l-nav */
     .header-nav {
       background: #f8f7f7;
+      height: 62px;
     }
     .header-nav .container {
       height: 62px;
@@ -182,7 +183,7 @@ export function generateStandaloneHtml(
     /* Breadcrumb */
     .breadcrumb-bar {
       background: transparent;
-      padding: 12px 0 48px;  /* 48px bottom = ~60px gap to content, matching ru.nl region--content margin-top:60px */
+      padding: 30px 0 48px;  /* 30px top = main-wrapper padding-top (breadcrumb at 154px); 48px bottom ≈ 60px gap to content */
     }
     /* Breadcrumb uses same width bounds as main-layout; inner nav padded to align with content column */
     .breadcrumb-bar .breadcrumb-inner {
@@ -196,12 +197,12 @@ export function generateStandaloneHtml(
     .breadcrumb .current { color: #666666; }
     .breadcrumb .chevron { color: #aaa; font-size: 13px; font-style: normal; }
 
-    /* Main Layout */
+    /* Main Layout — padding-top:0 because breadcrumb-bar above already has 30px top padding */
     .main-layout {
       display: flex;
       max-width: 1240px;
       margin: 0 auto;
-      padding: 30px 30px 110px;
+      padding: 0 30px 110px;
     }
 
     /* Sidebar */
@@ -315,11 +316,10 @@ export function generateStandaloneHtml(
     .sidebar-subnav button:hover .nav-text::after,
     .sidebar-subnav button.active .nav-text::after { transform: scaleX(1); }
 
-    /* Main Content — border-left divider like ru.nl */
+    /* Main Content — no border (ru.nl has none on .l-content) */
     .main-content {
       flex: 1;
       min-width: 0;
-      border-left: 1px solid #d7d7d7;
       padding-left: 50px;
     }
     .page-title {
@@ -506,14 +506,13 @@ export function generateStandaloneHtml(
     }
     .footer-secondary-links a { color: var(--ru-red-impact); text-decoration: underline; }
     .footer-secondary-links a:hover { color: var(--ru-maroon); }
-    /* Logo row: centered below links */
+    /* Logo row: aligns logo with content column, matching ru.nl .footer__logo */
     .footer-logo-block {
-      display: flex;
-      justify-content: center;
       max-width: 1240px;
       margin: 10px auto 0;
+      padding-left: 260px;  /* skip sidebar width → logo aligns with content column */
     }
-    .footer-logo { height: 55px; }
+    .footer-logo { height: 55px; display: block; }
 
     /* Separator */
     .separator-line {
