@@ -329,6 +329,8 @@ export function generateStandaloneHtml(
       min-width: 0;
       padding-left: 50px;
     }
+    /* View root: margin-top:84px aligns page title with sidebar heading (ru.nl region--content margin-top:60px + extra) */
+    #view-root { margin-top: 84px; }
     .page-title {
       font-size: 40px;
       font-weight: 800;
@@ -518,7 +520,7 @@ export function generateStandaloneHtml(
       max-width: 1240px;
       margin: 10px auto 0;
     }
-    .footer-logo { height: 55px; display: block; margin-left: 352px; }
+    .footer-logo { height: 55px; display: block; margin-left: 382px; }
 
     /* Separator */
     .separator-line {
