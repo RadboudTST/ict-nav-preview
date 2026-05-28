@@ -135,12 +135,11 @@ export function generateStandaloneHtml(
       align-items: center;
       gap: 6px;
       padding: 0 16px 0 0;
-      color: var(--ru-mahogany);
-      font-size: 18px;
+      color: var(--ru-berry);
+      font-size: 16px;
       white-space: nowrap;
       font-weight: 800;
-      line-height: 22px;
-      letter-spacing: -1px;
+      line-height: 32px;
     }
     .main-nav a:first-child { padding-left: 0; }
     .main-nav a:hover { text-decoration: underline; }
@@ -299,8 +298,10 @@ export function generateStandaloneHtml(
       padding: 15px 50px 15px 15px;
       margin-top: 50px;
       margin-bottom: 0;
-      font-size: 18px;
+      font-size: 26px;
       font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 28px;
       position: relative;
     }
     .banner .arrow-icon { position: absolute; right: 15px; }
@@ -318,7 +319,7 @@ export function generateStandaloneHtml(
     .category-grid {
       display: flex;
       flex-wrap: wrap;
-      margin-top: 40px;
+      margin-top: 20px;
       margin-bottom: 32px;
     }
     .category-btn {
@@ -443,13 +444,13 @@ export function generateStandaloneHtml(
     .footer-secondary-links {
       display: flex;
       justify-content: flex-end;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--ru-gray);
       max-width: 1240px;
       margin: 0 auto;
     }
-    .footer-secondary-links a { color: var(--ru-gray); }
-    .footer-secondary-links a:hover { text-decoration: underline; }
+    .footer-secondary-links a { color: var(--ru-red-impact); text-decoration: underline; }
+    .footer-secondary-links a:hover { color: var(--ru-maroon); }
     .footer-logo-block {
       display: flex;
       align-items: center;
