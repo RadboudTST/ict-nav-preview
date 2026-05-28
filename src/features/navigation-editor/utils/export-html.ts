@@ -413,7 +413,7 @@ export function generateStandaloneHtml(
     }
     .featured-card { width: calc(50% - 15px); min-width: 280px; }
     .featured-card h3 { margin-bottom: 4px; }
-    .featured-card h3 a {
+    .featured-card h3 a, .featured-card-link {
       font-size: 22px;
       font-weight: 800;
       color: #730e04;
@@ -422,7 +422,8 @@ export function generateStandaloneHtml(
       line-height: 26px;
       display: inline-block;
     }
-    .featured-card h3 a:hover { color: var(--ru-red-impact); }
+    .featured-card-link { background: none; border: none; font-family: inherit; cursor: pointer; padding: 0; text-align: left; }
+    .featured-card h3 a:hover, .featured-card-link:hover { color: var(--ru-red-impact); }
     .featured-card p { font-size: 16px; color: var(--ru-text); line-height: 26px; }
 
     /* Page Cards (category detail) */
@@ -826,12 +827,56 @@ export function generateStandaloneHtml(
             </div>
 
             <div class="featured-grid">
-              ${ictRootPage.featuredCards.map(card => `
+              ${ictRootPage.featuredCards.map(card => {
+                const t = card.title.toLowerCase();
+                let matchCatId: string | null = null;
+                let matchPageId: string | null = null;
+                // 1. Exact page title match
+                outer: for (const cat of categories) {
+                  for (const page of (cat.pages || [])) {
+                    if (page.title.toLowerCase() === t) {
+                      matchCatId = cat.id; matchPageId = page.id; break outer;
+                    }
+                  }
+                }
+                // 2. Exact category label match
+                if (!matchCatId) {
+                  const catMatch = categories.find(c => c.label.toLowerCase() === t);
+                  if (catMatch) matchCatId = catMatch.id;
+                }
+                // 3. Keyword-based category match (for cards like "Mijn Radboud-account", "ICT Helpdesk")
+                if (!matchCatId) {
+                  const keywords: [string, string][] = [
+                    ['radboud-account', 'radboud-account'],
+                    ['radboud account', 'radboud-account'],
+                    ['helpdesk', 'radboud-account'],
+                    ['servicepunt', 'radboud-account'],
+                    ['datalek', 'digitale veiligheid'],
+                    ['beveiliging', 'digitale veiligheid'],
+                    ['gedragsregel', 'digitale veiligheid'],
+                    ['veiligheid', 'digitale veiligheid'],
+                  ];
+                  for (const [keyword, targetCatLabel] of keywords) {
+                    if (t.includes(keyword)) {
+                      const catMatch = categories.find(c => c.label.toLowerCase().includes(targetCatLabel));
+                      if (catMatch) { matchCatId = catMatch.id; break; }
+                    }
+                  }
+                }
+                const onclick = matchPageId
+                  ? `showPage('${matchCatId}', '${matchPageId}')`
+                  : matchCatId
+                    ? `showCategory('${matchCatId}')`
+                    : null;
+                return `
               <div class="featured-card">
-                <h3><a href="${card.url || '#'}" target="_blank" rel="noopener noreferrer">${escapeHtml(card.title)} →</a></h3>
+                <h3>${onclick
+                  ? `<button type="button" class="featured-card-link" onclick="${onclick}">${escapeHtml(card.title)} →</button>`
+                  : `<a href="${card.url || '#'}" target="_blank" rel="noopener noreferrer">${escapeHtml(card.title)} →</a>`
+                }</h3>
                 <p>${card.description}</p>
-              </div>
-              `).join('')}
+              </div>`;
+              }).join('')}
             </div>
           </div>
 
