@@ -105,7 +105,7 @@ export function generateStandaloneHtml(
     .content-wrapper { flex: 1; }
     .container { max-width: 1240px; margin: 0 auto; padding: 0 30px; }
 
-    /* Header - Top Bar (logo left + utility links right) */
+    /* Header - Top Bar (logo centered, utility links right via margin-left:auto) */
     .header-top {
       background: #fff;
       height: 62px;
@@ -114,11 +114,15 @@ export function generateStandaloneHtml(
       height: 100%;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      position: relative;
     }
     .logo { height: 40px; width: auto; display: block; }
-    /* Utility nav lives in the top bar on the right */
-    .utility-nav { display: flex; align-items: center; gap: 0; }
+    /* Utility nav lives in the top bar, pushed to the right */
+    .utility-nav {
+      display: flex; align-items: center; gap: 0;
+      position: absolute; right: 30px;
+    }
     .utility-nav a {
       display: flex; align-items: center; gap: 4px;
       color: #303030; font-size: 15px; font-weight: 800;
@@ -200,7 +204,8 @@ export function generateStandaloneHtml(
       flex-shrink: 0;
       padding: 80px 30px 0 0;
     }
-    /* Heading: "Campusfaciliteiten & gebouwen" — 18px/800/#4a0004, red underline via pseudo */
+    /* Heading: "Campusfaciliteiten & gebouwen" — 18px/800/#4a0004
+       Underline is on the inner span (text-width only), matching ru.nl span::after mechanism */
     .sidebar-header {
       font-size: 18px;
       font-weight: 800;
@@ -208,11 +213,15 @@ export function generateStandaloneHtml(
       line-height: 22px;
       letter-spacing: -1px;
       display: block;
-      position: relative;
-      padding-bottom: 5px;
       margin-bottom: 10px;
     }
-    .sidebar-header::after {
+    /* The inner span carries the underline — width = text width only */
+    .sidebar-header-text {
+      display: inline-block;
+      position: relative;
+      padding-bottom: 5px;
+    }
+    .sidebar-header-text::after {
       content: '';
       position: absolute;
       bottom: 0;
@@ -237,23 +246,27 @@ export function generateStandaloneHtml(
       width: 100%;
     }
     .sidebar-nav > li > a:hover, .sidebar-nav > li > button:hover { color: var(--ru-red-impact); }
-    /* ICT active item — red text + red underline below */
+    /* ICT active item — red text; underline on inner span (text-width only) */
     .sidebar-nav > li > button.sidebar-ict {
       color: var(--ru-red-impact);
       font-weight: 700;
       font-size: 18px;
       line-height: 24px;
       letter-spacing: -1px;
+    }
+    /* The inner .nav-text span carries the underline — width = "ICT" text width */
+    .sidebar-nav > li > button .nav-text {
+      display: inline-block;
       position: relative;
       padding-bottom: 4px;
     }
-    .sidebar-nav > li > button.sidebar-ict::after {
+    .sidebar-nav > li > button.sidebar-ict .nav-text::after {
       content: '';
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 2px;
+      height: 3px;
       background: var(--ru-red-impact);
     }
     /* Level-2 sub-items: 16px/400/#4a0004, indented 20px, NO border */
@@ -723,12 +736,12 @@ export function generateStandaloneHtml(
       <div class="main-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
-          <div class="sidebar-header">Campusfaciliteiten & gebouwen</div>
+          <div class="sidebar-header"><span class="sidebar-header-text">Campusfaciliteiten &amp; gebouwen</span></div>
           <ul class="sidebar-nav">
-            <li><a href="#">Gebouwen en ruimtes</a></li>
-            <li><a href="#">Eten en drinken</a></li>
+            <li><a href="#"><span class="nav-text">Gebouwen en ruimtes</span></a></li>
+            <li><a href="#"><span class="nav-text">Eten en drinken</span></a></li>
             <li>
-              <button class="sidebar-ict" onclick="showRoot()">ICT</button>
+              <button class="sidebar-ict" onclick="showRoot()"><span class="nav-text">ICT</span></button>
               <ul class="sidebar-subnav" id="sidebar-categories">
                 ${sortedForSidebar.map(cat => `
                 <li>
