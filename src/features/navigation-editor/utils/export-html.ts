@@ -828,7 +828,7 @@ export function generateStandaloneHtml(
             <div class="featured-grid">
               ${ictRootPage.featuredCards.map(card => `
               <div class="featured-card">
-                <h3><a href="#">${card.title} →</a></h3>
+                <h3><a href="${card.url || '#'}" target="_blank" rel="noopener noreferrer">${escapeHtml(card.title)} →</a></h3>
                 <p>${card.description}</p>
               </div>
               `).join('')}
