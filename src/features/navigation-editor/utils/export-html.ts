@@ -432,6 +432,7 @@ export function generateStandaloneHtml(
       gap: 30px;
     }
     .page-card { cursor: pointer; width: calc(50% - 15px); min-width: 280px; }
+    button.page-card { text-align: left; background: none; border: none; font-family: inherit; padding: 0; }
     .page-card h3 { margin-bottom: 4px; }
     .page-card h3 span {
       font-size: 22px;
@@ -866,10 +867,10 @@ export function generateStandaloneHtml(
             `) : ''}
             <div class="page-grid">
               ${(cat.pages || []).map(page => `
-              <div class="page-card" onclick="showPage('${cat.id}', '${page.id}')">
+              <button type="button" class="page-card" onclick="showPage('${cat.id}', '${page.id}')">
                 <h3><span>${escapeHtml(page.title)} →</span></h3>
                 <p>${escapeHtml(page.description || '')}</p>
-              </div>
+              </button>
               `).join('')}
             </div>
           </div>
@@ -1008,7 +1009,8 @@ export function generateStandaloneHtml(
 
     // Update breadcrumb
     function updateBreadcrumb(text) {
-      document.getElementById('breadcrumb-current').textContent = text;
+      const el = document.getElementById('breadcrumb-current');
+      if (el) el.textContent = text;
     }
 
     // Hide all views
@@ -1021,6 +1023,7 @@ export function generateStandaloneHtml(
     // Show root (ICT overview)
     function showRoot() {
       hideAllViews();
+      window.scrollTo(0, 0);
       document.getElementById('view-root').classList.remove('hidden');
       updateSidebarActive(null);
       updateBreadcrumb('ICT');
@@ -1032,6 +1035,7 @@ export function generateStandaloneHtml(
     // Show category
     function showCategory(categoryId) {
       hideAllViews();
+      window.scrollTo(0, 0);
       const viewEl = document.getElementById('view-category-' + categoryId);
       if (viewEl) {
         viewEl.classList.remove('hidden');
@@ -1047,6 +1051,7 @@ export function generateStandaloneHtml(
     // Show page detail
     function showPage(categoryId, pageId) {
       hideAllViews();
+      window.scrollTo(0, 0);
       const viewEl = document.getElementById('view-page-' + pageId);
       if (viewEl) {
         viewEl.classList.remove('hidden');
@@ -1062,8 +1067,8 @@ export function generateStandaloneHtml(
 
     // Toggle accordion item
     function toggleAccordion(el) {
-      const item = el.closest('.accordion-item');
-      item.classList.toggle('expanded');
+      const item = el?.closest('.accordion-item');
+      if (item) item.classList.toggle('expanded');
     }
 
     // Initialize
