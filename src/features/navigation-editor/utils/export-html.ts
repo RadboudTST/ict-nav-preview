@@ -81,7 +81,7 @@ export function generateStandaloneHtml(
       font-family: 'Open Sans', Arial, sans-serif;
       color: #303030;
       line-height: 1.5;
-      background: #f5f5f5;
+      background: #f6f6f6;
     }
     a { text-decoration: none; color: inherit; }
     button { font-family: inherit; cursor: pointer; border: none; background: none; }
@@ -148,7 +148,7 @@ export function generateStandaloneHtml(
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 0 40px 0 0;
+      padding: 5px 16px 5px 0;
       color: var(--ru-berry);
       font-size: 16px;
       white-space: nowrap;
