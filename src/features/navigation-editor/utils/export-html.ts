@@ -228,7 +228,7 @@ export function generateStandaloneHtml(
       left: 0;
       width: 100%;
       height: 3px;
-      background: var(--ru-maroon);
+      background: var(--ru-mahogany);  /* #4a0004 — matches ru.nl rgb(74,0,4) */
     }
     /* Level-1 items: Gebouwen, Eten, ICT — 18px/700/#730e04, gap via li+li */
     .sidebar-nav { margin: 10px 0 10px 20px; padding: 0; }
@@ -266,8 +266,8 @@ export function generateStandaloneHtml(
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 3px;
-      background: var(--ru-red-impact);
+      height: 2px;                   /* ru.nl measures 2px for L1 items */
+      background: var(--ru-maroon);  /* #730e04 = rgb(115,14,4) — matches ru.nl */
     }
     /* Level-2 sub-items: 16px/400/#4a0004, indented 20px, NO border */
     .sidebar-subnav {
@@ -288,8 +288,26 @@ export function generateStandaloneHtml(
       width: 100%;
       display: block;
     }
-    .sidebar-subnav button:hover { color: var(--ru-red-impact); text-decoration: underline; }
+    .sidebar-subnav button:hover { color: var(--ru-red-impact); }
     .sidebar-subnav button.active { color: var(--ru-red-impact); font-weight: 700; }
+    /* Sub-item inner span: 1px maroon underline, slides in on hover/active (ru.nl pattern) */
+    .sidebar-subnav button .nav-text {
+      display: inline-block;
+      position: relative;
+      padding-bottom: 2px;
+    }
+    .sidebar-subnav button .nav-text::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 1px;
+      background: var(--ru-maroon);  /* rgb(115,14,4) = #730e04 */
+      transform: scaleX(0);
+      transform-origin: left bottom;
+      transition: transform 0.2s;
+    }
+    .sidebar-subnav button:hover .nav-text::after,
+    .sidebar-subnav button.active .nav-text::after { transform: scaleX(1); }
 
     /* Main Content — border-left divider like ru.nl */
     .main-content {
@@ -390,7 +408,7 @@ export function generateStandaloneHtml(
       display: inline-block;
     }
     .featured-card h3 a:hover { color: var(--ru-red-impact); }
-    .featured-card p { font-size: 16px; color: var(--ru-text); }
+    .featured-card p { font-size: 16px; color: var(--ru-text); line-height: 26px; }
 
     /* Page Cards (category detail) */
     .page-grid {
@@ -410,7 +428,7 @@ export function generateStandaloneHtml(
       display: inline-block;
     }
     .page-card:hover h3 span { color: var(--ru-red-impact); }
-    .page-card p { font-size: 16px; color: var(--ru-text); }
+    .page-card p { font-size: 16px; color: var(--ru-text); line-height: 26px; }
 
     /* Footer */
     .footer {
@@ -440,8 +458,8 @@ export function generateStandaloneHtml(
       letter-spacing: -1px;
       display: block;
     }
-    .footer ul li { margin-bottom: 6px; }
-    .footer ul a { font-size: 18px; font-weight: 400; color: var(--ru-red-impact); text-decoration: underline; }
+    .footer ul li { margin-bottom: 15px; }
+    .footer ul a { font-size: 18px; font-weight: 400; color: var(--ru-red-impact); text-decoration: underline; line-height: 30px; }
     .footer ul a:hover { color: var(--ru-maroon); }
     .footer-address p { font-size: 18px; color: var(--ru-text); margin-bottom: 8px; }
     .footer-address a { font-size: 18px; color: var(--ru-red-impact); text-decoration: underline; }
@@ -745,7 +763,7 @@ export function generateStandaloneHtml(
               <ul class="sidebar-subnav" id="sidebar-categories">
                 ${sortedForSidebar.map(cat => `
                 <li>
-                  <button onclick="showCategory('${cat.id}')" id="sidebar-${cat.id}">${escapeHtml(cat.label)}</button>
+                  <button onclick="showCategory('${cat.id}')" id="sidebar-${cat.id}"><span class="nav-text">${escapeHtml(cat.label)}</span></button>
                 </li>
                 `).join('')}
               </ul>
