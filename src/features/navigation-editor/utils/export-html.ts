@@ -184,11 +184,12 @@ export function generateStandaloneHtml(
       background: transparent;
       padding: 12px 0;
     }
-    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 15px; }
+    /* Align breadcrumb with the content column (sidebar is 260px, container already provides 30px left pad) */
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 15px; padding-left: 260px; }
     .breadcrumb a { color: #666666; text-decoration: underline; }
     .breadcrumb a:hover { color: var(--ru-red-impact); }
     .breadcrumb .current { color: #666666; }
-    .breadcrumb .chevron { color: var(--ru-gray); font-size: 12px; }
+    .breadcrumb .chevron { color: var(--ru-gray); font-size: 14px; }
 
     /* Main Layout */
     .main-layout {
