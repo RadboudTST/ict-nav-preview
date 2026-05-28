@@ -239,14 +239,14 @@ export function generateStandaloneHtml(
     /* Level-1 items: Gebouwen, Eten, ICT — 18px/700/#730e04, gap via li+li */
     .sidebar-nav { margin: 10px 0 10px 20px; padding: 0; }
     .sidebar-nav > li { margin: 0; padding: 0; }
-    .sidebar-nav > li + li { margin-top: 10px; }
+    .sidebar-nav > li + li { margin-top: 0; }
     .sidebar-nav > li > a, .sidebar-nav > li > button {
       display: block;
       padding: 0;
       font-size: 18px;
       font-weight: 700;
       color: var(--ru-maroon);
-      line-height: 24px;
+      line-height: 34px;
       letter-spacing: -1px;
       text-align: left;
       width: 100%;
@@ -257,7 +257,7 @@ export function generateStandaloneHtml(
       color: var(--ru-red-impact);
       font-weight: 700;
       font-size: 18px;
-      line-height: 24px;
+      line-height: 34px;
       letter-spacing: -1px;
     }
     /* The inner .nav-text span carries the underline — width = "ICT" text width */
@@ -282,7 +282,7 @@ export function generateStandaloneHtml(
       border-left: none;
     }
     .sidebar-subnav li { margin: 0; padding: 0; }
-    .sidebar-subnav li + li { margin-top: 8px; }
+    .sidebar-subnav li + li { margin-top: 0; }
     .sidebar-subnav button {
       padding: 5px 0;
       font-size: 16px;
