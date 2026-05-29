@@ -19,9 +19,13 @@ function escapeHtml(str: string): string {
  * so TipTap Details accordions start collapsed in the exported preview.
  */
 function collapseDetails(html: string): string {
-  return html.replace(/<details(\s[^>]*)?\s+open(\s[^>]*)?>/gi, (match, before = '', after = '') => {
-    return `<details${before}${after}>`;
-  });
+  // Match each <details> start tag, then strip the `open` attribute in any of its
+  // forms — bare (`open`), valued (`open=""`, `open="open"`, `open='...'`, `open=x`) —
+  // regardless of position. TipTap/ProseMirror serializes it as `open=""`, which the
+  // previous regex (expecting bare `open`) missed, leaving accordions expanded.
+  return html.replace(/<details\b[^>]*>/gi, (tag) =>
+    tag.replace(/\s+open(\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?/gi, '')
+  );
 }
 
 /**
