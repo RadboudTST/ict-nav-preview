@@ -40,6 +40,44 @@ export function generateStandaloneHtml(
   // Use the actual categories array order for sidebar (respects user reordering)
   const sortedForSidebar = categories;
 
+  // Find a matching SPA destination for a given title string.
+  // Returns { catId, pageId? } if found, null otherwise.
+  function findSpaTarget(title: string): { catId: string; pageId?: string } | null {
+    const t = title.toLowerCase();
+    // 1. Exact page title match
+    for (const cat of categories) {
+      for (const page of (cat.pages || [])) {
+        if (page.title.toLowerCase() === t) return { catId: cat.id, pageId: page.id };
+      }
+    }
+    // 2. Exact category label match
+    const catMatch = categories.find(c => c.label.toLowerCase() === t);
+    if (catMatch) return { catId: catMatch.id };
+    // 3. Keyword fallback for titles that map to a known category by topic
+    const keywords: [string, string][] = [
+      ['radboud-account', 'radboud-account'], ['radboud account', 'radboud-account'],
+      ['helpdesk', 'radboud-account'], ['servicepunt', 'radboud-account'],
+      ['datalek', 'digitale veiligheid'], ['beveiliging', 'digitale veiligheid'],
+      ['gedragsregel', 'digitale veiligheid'], ['veiligheid', 'digitale veiligheid'],
+      ['storingen', 'digitale veiligheid'],
+    ];
+    for (const [kw, targetLabel] of keywords) {
+      if (t.includes(kw)) {
+        const c = categories.find(c => c.label.toLowerCase().includes(targetLabel));
+        if (c) return { catId: c.id };
+      }
+    }
+    return null;
+  }
+
+  // Build an onclick string from a findSpaTarget result
+  function spaOnclick(match: { catId: string; pageId?: string } | null): string | null {
+    if (!match) return null;
+    return match.pageId
+      ? `showPage('${match.catId}', '${match.pageId}')`
+      : `showCategory('${match.catId}')`;
+  }
+
   return `<!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -260,6 +298,11 @@ export function generateStandaloneHtml(
       width: 100%;
     }
     .sidebar-nav > li > a:hover, .sidebar-nav > li > button:hover { color: var(--ru-red-impact); }
+    /* Non-clickable L1 context items (other campus sections, not navigable in this prototype) */
+    .sidebar-nav > li > .nav-text-static {
+      display: block; padding: 0; font-size: 18px; font-weight: 700;
+      color: var(--ru-maroon); line-height: 34px; letter-spacing: -1px; cursor: default;
+    }
     /* ICT active item — red text; underline on inner span (text-width only) */
     .sidebar-nav > li > button.sidebar-ict {
       color: var(--ru-red-impact);
@@ -363,7 +406,8 @@ export function generateStandaloneHtml(
       position: relative;
     }
     .banner .arrow-icon { position: absolute; right: 15px; }
-    .banner:hover { background: var(--ru-mahogany); }
+    .banner:hover, .banner:focus { background: var(--ru-mahogany); }
+    button.banner { width: 100%; text-align: left; }
 
     /* Quick Links */
     .quick-links { margin-top: 30px; margin-bottom: 0; }
@@ -371,6 +415,8 @@ export function generateStandaloneHtml(
     .quick-links-list { display: flex; flex-wrap: wrap; align-items: center; }
     .quick-links-list a { font-size: 18px; color: var(--ru-red-impact); font-weight: 800; text-decoration: underline; }
     .quick-links-list a:hover { color: var(--ru-maroon); }
+    .quick-links-list button { font-size: 18px; color: var(--ru-red-impact); font-weight: 800; text-decoration: underline; background: none; border: none; font-family: inherit; cursor: pointer; padding: 0; }
+    .quick-links-list button:hover { color: var(--ru-maroon); }
     .quick-links-list .bullet { margin: 0 8px; color: var(--ru-text); }
 
     /* Category Buttons Grid — flex-wrap like real ru.nl */
@@ -777,8 +823,8 @@ export function generateStandaloneHtml(
         <aside class="sidebar">
           <div class="sidebar-header"><span class="sidebar-header-text">Campusfaciliteiten &amp; gebouwen</span></div>
           <ul class="sidebar-nav">
-            <li><a href="#"><span class="nav-text">Gebouwen en ruimtes</span></a></li>
-            <li><a href="#"><span class="nav-text">Eten en drinken</span></a></li>
+            <li><span class="nav-text-static">Gebouwen en ruimtes</span></li>
+            <li><span class="nav-text-static">Eten en drinken</span></li>
             <li>
               <button class="sidebar-ict" onclick="showRoot()"><span class="nav-text">ICT</span></button>
               <ul class="sidebar-subnav" id="sidebar-categories">
@@ -789,10 +835,10 @@ export function generateStandaloneHtml(
                 `).join('')}
               </ul>
             </li>
-            <li><a href="#">Materialen lenen of inzien</a></li>
-            <li><a href="#">Producten en diensten (in)kopen</a></li>
-            <li><a href="#">Communicatie en promotie</a></li>
-            <li><a href="#">Veiligheid en noodsituaties</a></li>
+            <li><span class="nav-text-static">Materialen lenen of inzien</span></li>
+            <li><span class="nav-text-static">Producten en diensten (in)kopen</span></li>
+            <li><span class="nav-text-static">Communicatie en promotie</span></li>
+            <li><span class="nav-text-static">Veiligheid en noodsituaties</span></li>
           </ul>
         </aside>
 
@@ -803,17 +849,25 @@ export function generateStandaloneHtml(
             <h1 class="page-title">${ictRootPage.title}</h1>
             <p class="intro-text">${ictRootPage.description}</p>
 
-            <a href="#" class="banner">
-              <span>${ictRootPage.banner.title}</span>
-              <span class="arrow-icon">→</span>
-            </a>
+            ${(() => {
+              const bannerMatch = findSpaTarget(ictRootPage.banner.title);
+              const bannerOnclick = spaOnclick(bannerMatch);
+              return bannerOnclick
+                ? `<button type="button" class="banner" onclick="${bannerOnclick}"><span>${ictRootPage.banner.title}</span><span class="arrow-icon">→</span></button>`
+                : `<div class="banner"><span>${ictRootPage.banner.title}</span><span class="arrow-icon">→</span></div>`;
+            })()}
 
             <div class="quick-links">
               <p class="quick-links-label">Ook veel bekeken</p>
               <div class="quick-links-list">
-                ${ictRootPage.quickLinks.map((link, i) => `
-                  <a href="#">${link.label}</a>${i < ictRootPage.quickLinks.length - 1 ? '<span class="bullet">•</span>' : ''}
-                `).join('')}
+                ${ictRootPage.quickLinks.map((link, i) => {
+                  const qlMatch = findSpaTarget(link.label);
+                  const qlOnclick = spaOnclick(qlMatch);
+                  const bullet = i < ictRootPage.quickLinks.length - 1 ? '<span class="bullet">•</span>' : '';
+                  return qlOnclick
+                    ? `<button type="button" onclick="${qlOnclick}">${escapeHtml(link.label)}</button>${bullet}`
+                    : `<span>${escapeHtml(link.label)}</span>${bullet}`;
+                }).join('')}
               </div>
             </div>
 
@@ -828,46 +882,7 @@ export function generateStandaloneHtml(
 
             <div class="featured-grid">
               ${ictRootPage.featuredCards.map(card => {
-                const t = card.title.toLowerCase();
-                let matchCatId: string | null = null;
-                let matchPageId: string | null = null;
-                // 1. Exact page title match
-                outer: for (const cat of categories) {
-                  for (const page of (cat.pages || [])) {
-                    if (page.title.toLowerCase() === t) {
-                      matchCatId = cat.id; matchPageId = page.id; break outer;
-                    }
-                  }
-                }
-                // 2. Exact category label match
-                if (!matchCatId) {
-                  const catMatch = categories.find(c => c.label.toLowerCase() === t);
-                  if (catMatch) matchCatId = catMatch.id;
-                }
-                // 3. Keyword-based category match (for cards like "Mijn Radboud-account", "ICT Helpdesk")
-                if (!matchCatId) {
-                  const keywords: [string, string][] = [
-                    ['radboud-account', 'radboud-account'],
-                    ['radboud account', 'radboud-account'],
-                    ['helpdesk', 'radboud-account'],
-                    ['servicepunt', 'radboud-account'],
-                    ['datalek', 'digitale veiligheid'],
-                    ['beveiliging', 'digitale veiligheid'],
-                    ['gedragsregel', 'digitale veiligheid'],
-                    ['veiligheid', 'digitale veiligheid'],
-                  ];
-                  for (const [keyword, targetCatLabel] of keywords) {
-                    if (t.includes(keyword)) {
-                      const catMatch = categories.find(c => c.label.toLowerCase().includes(targetCatLabel));
-                      if (catMatch) { matchCatId = catMatch.id; break; }
-                    }
-                  }
-                }
-                const onclick = matchPageId
-                  ? `showPage('${matchCatId}', '${matchPageId}')`
-                  : matchCatId
-                    ? `showCategory('${matchCatId}')`
-                    : null;
+                const onclick = spaOnclick(findSpaTarget(card.title));
                 return `
               <div class="featured-card">
                 <h3>${onclick
@@ -1036,10 +1051,6 @@ export function generateStandaloneHtml(
     // Embedded structure data
     const navigationData = ${JSON.stringify(categories, null, 2)};
 
-    // Current state
-    let currentView = 'root';
-    let currentCategoryId = null;
-    let currentPageId = null;
 
     // Update sidebar active states
     function updateSidebarActive(categoryId) {
@@ -1072,9 +1083,6 @@ export function generateStandaloneHtml(
       document.getElementById('view-root').classList.remove('hidden');
       updateSidebarActive(null);
       updateBreadcrumb('ICT');
-      currentView = 'root';
-      currentCategoryId = null;
-      currentPageId = null;
     }
 
     // Show category
@@ -1087,9 +1095,6 @@ export function generateStandaloneHtml(
         const category = navigationData.find(c => c.id === categoryId);
         updateSidebarActive(categoryId);
         updateBreadcrumb(category ? category.label : 'Categorie');
-        currentView = 'category';
-        currentCategoryId = categoryId;
-        currentPageId = null;
       }
     }
 
@@ -1104,9 +1109,6 @@ export function generateStandaloneHtml(
         const page = category?.pages?.find(p => p.id === pageId);
         updateSidebarActive(categoryId);
         updateBreadcrumb(page ? page.title : 'Pagina');
-        currentView = 'page';
-        currentCategoryId = categoryId;
-        currentPageId = pageId;
       }
     }
 
